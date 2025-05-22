@@ -1,5 +1,5 @@
 const createError = require('http-errors');
-const HospitalSV = require('../services/hospital');
+// const HospitalSV = require('../services/hospital');
 const { resOk } = require('../helpers/utils');
 class DoctorSite {
     static async address(req, res, next) {

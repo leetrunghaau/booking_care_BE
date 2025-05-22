@@ -1,15 +1,39 @@
 const createError = require('http-errors');
-const HospitalSV = require('../services/hospital');
+// const HospitalSV = require('../services/hospital');
 const { resOk } = require('../helpers/utils');
 class HospitalCo {
     static async all(req, res, next) {
         try {
 
-            const hospitals = await HospitalSV.all();
-            if (!hospitals) {
-                return next(createError.NotFound())
-            }
-            resOk(res, hospitals);
+            const rs = [
+                {
+                    id: 1,
+                    name: "Bệnh viện Đại học Y Hà Nội",
+                    slug: "dai-hoc-y-ha-noi",
+                    address: "Số 1 Tôn Thất Tùng, Đống Đa, Hà Nội",
+                    thumbnail: "/placeholder.svg?text=BV+1",
+                },
+                {
+                    id: 2,
+                    name: "Bệnh viện Bạch Mai",
+                    slug: "bach-mai",
+                    address: "78 Giải Phóng, Đống Đa, Hà Nội",
+                    thumbnail: "/placeholder.svg?text=BV+2",
+                },
+                {
+                    id: 3,
+                    name: "Phòng khám Đa khoa Quốc tế",
+                    slug: "da-khoa-quoc-te",
+                    address: "123 Lê Lợi, Quận 1, TP.HCM",
+                    thumbnail: "/placeholder.svg?text=PK+3",
+                },
+            ]
+
+            // const hospitals = await HospitalSV.all();
+            // if (!hospitals) {
+            //     return next(createError.NotFound())
+            // }
+            resOk(res, rs);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

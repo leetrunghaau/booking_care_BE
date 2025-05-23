@@ -1,5 +1,4 @@
 const createError = require('http-errors');
-// const HospitalSV = require('../services/hospital');
 const { resOk } = require('../helpers/utils');
 class HospitalCo {
     static async all(req, res, next) {
@@ -28,11 +27,6 @@ class HospitalCo {
                     thumbnail: "/placeholder.svg?text=PK+3",
                 },
             ]
-
-            // const hospitals = await HospitalSV.all();
-            // if (!hospitals) {
-            //     return next(createError.NotFound())
-            // }
             resOk(res, rs);
         } catch (error) {
             console.log(error);

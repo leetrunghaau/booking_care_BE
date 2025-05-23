@@ -1,7 +1,5 @@
-// addressRoutes.js
-
-const express = require('express');
-const DoctorSite = require('../controllers/doctor-site');
+const express = require("express");
+const DoctorSite = require("../controllers/doctor-site");
 const router = express.Router();
 
 // Define routes
@@ -13,7 +11,6 @@ router.get("/doctor-site/doctor/:slug/experience",DoctorSite.doctorExperience);
 router.get("/doctor-site/doctor/:slug/review",DoctorSite.doctorReview);
 router.post("/doctor-site/doctor/:slug/rating",DoctorSite.doctorRating);
 router.get("/doctor-site/doctor/:slug/faqs",DoctorSite.doctorFaqs);
-
 
 
 module.exports = router;

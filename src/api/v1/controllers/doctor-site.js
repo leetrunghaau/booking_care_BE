@@ -1,5 +1,4 @@
 const createError = require('http-errors');
-// const HospitalSV = require('../services/hospital');
 const { resOk } = require('../helpers/utils');
 class DoctorSite {
     static async address(req, res, next) {
@@ -37,7 +36,7 @@ class DoctorSite {
         }
     }
 
-    static async doctors(req, res, next) {
+    static async all(req, res, next) {
         try {
             const rs = [
                 {
@@ -151,6 +150,28 @@ class DoctorSite {
                     imageUrl: "https://randomuser.me/api/portraits/women/10.jpg",
                 },
             ];
+            resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+    static async one(req, res, next) {
+        try {
+            const rs = {
+                id: 1,
+                name: "Bác sĩ Nguyễn Văn A",
+                img:"/placeholder.svg?height=300&width=300",
+                title: "Tiến sĩ, Bác sĩ chuyên khoa II",
+                specialty: "Tim mạch",
+                hospital: "Bệnh viện Đại học Y Hà Nội",
+                experience: 15,
+                rating: 4.9,
+                reviewCount: 124,
+                price: "350.000 - 500.000",
+                address: "1 Tôn Thất Tùng, Đống Đa, Hà Nội",
+                specializations: ["Bệnh mạch vành", "Rối loạn nhịp tim", "Suy tim", "Tăng huyết áp", "Bệnh van tim"],
+            }
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -318,6 +339,51 @@ class DoctorSite {
                     answer: "Bạn có thể hủy lịch hẹn trước 24 giờ mà không bị mất phí.",
                 },
             ]
+            resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async doctorHospital(req, res, next) {
+        try {
+            const rs = {
+                id: 1,
+                name: "Bệnh viện Nhân Dân Gia Định",
+                address: "Số 1 Nơ Trang Long, Phường 7, Quận Bình Thạnh, TP.HCM",
+                img: "https://example.com/images/bv-gia-dinh.jpg",
+                slug: "benh-vien-nhan-dan-gia-dinh",
+                times: [
+                    { weekend: 1, timeStart: 450, timeEnd: 1020 }, // Thứ 2
+                    { weekend: 2, timeStart: 450, timeEnd: 1020 }, // Thứ 3
+                    { weekend: 3, timeStart: 450, timeEnd: 1020 }, // Thứ 4
+                    { weekend: 4, timeStart: 450, timeEnd: 1020 }, // Thứ 5
+                    { weekend: 5, timeStart: 450, timeEnd: 1020 }, // Thứ 6
+                    { weekend: 6, timeStart: 450, timeEnd: 720 },  // Thứ 7
+                ]
+            }
+            resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async doctorSchedule(req, res, next) {
+        try {
+            const rs = [
+                { time: 480, available: true },   // 08:00
+                { time: 510, available: false },  // 08:30
+                { time: 540, available: true },   // 09:00
+                { time: 570, available: true },   // 09:30
+                { time: 600, available: false },  // 10:00
+                { time: 630, available: true },   // 10:30
+                { time: 660, available: true },   // 11:00
+                { time: 690, available: false },  // 11:30
+                { time: 720, available: true },   // 12:00
+                { time: 750, available: false }   // 12:30
+            ];
             resOk(res, rs);
         } catch (error) {
             console.log(error);

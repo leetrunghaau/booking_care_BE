@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Doctor = require('./doctor');
 
-const ScheduleSetting = db.define("schedule_setting", {
+const ScheduleSetting = db.define("scheduleSetting", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -20,7 +20,7 @@ const ScheduleSetting = db.define("schedule_setting", {
   },
 
   workingDays: {
-    type: DataTypes.JSON, // VD: ["T2", "T3", "T4", "T5", "T6"]
+    type: DataTypes.INTEGER, 
     field: "working_days",
   },
 
@@ -36,7 +36,7 @@ const ScheduleSetting = db.define("schedule_setting", {
 
   appointmentDuration: {
     type: DataTypes.INTEGER,
-    field: "appointment_duration", // phút
+    field: "appointment_duration", 
   },
 
   appointmentFee: {
@@ -60,11 +60,19 @@ const ScheduleSetting = db.define("schedule_setting", {
     field: "lunch_end",
   },
 
+  isDefault: {
+    type: DataTypes.BOOLEAN,
+    field: "is_default",
+    allowNull: false,
+    defaultValue: false,
+    comment: "true = lịch làm việc cài đặt, false = template"
+  }
+
 }, {
   tableName: "schedule_settings",
   timestamps: false,
 });
 
-ScheduleSetting.belongsTo(Doctor, { foreignKey: "doctorId" });
+ScheduleSetting.belongsTo(Doctor, { foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 module.exports = ScheduleSetting;

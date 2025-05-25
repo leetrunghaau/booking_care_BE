@@ -1,6 +1,5 @@
 // userRepository.js
 
-const User = require('../models/user-model');
 
 class UserRepository {
   static async getUserById(userId) {

@@ -1,46 +1,22 @@
 const createError = require('http-errors');
 const { resOk } = require('../helpers/utils');
+const HomeSV = require('../services/home');
 class Home {
     static async doctors(req, res, next) {
         try {
-            const rs = [
-                {
-                    id: 1,
-                    name: "Nguyễn Văn A",
-                    img: "/placeholder.svg",
-                    slug: "Nguyen-Van-A-00004",
-                    specialty: "Chuyên khoa Tim mạch",
-                    rating: 3.7,
-                    sumRating: 120
-                },
-                {
-                    id: 2,
-                    name: "Nguyễn Văn A",
-                    img: "/placeholder.svg",
-                    slug: "Nguyen-Van-A-00004",
-                    specialty: "Chuyên khoa Tim mạch",
-                    rating: 3.7,
-                    sumRating: 120
-                },
-                {
-                    id: 3,
-                    name: "Nguyễn Văn A",
-                    img: "/placeholder.svg",
-                    slug: "Nguyen-Van-A-00004",
-                    specialty: "Chuyên khoa Tim mạch",
-                    rating: 3.7,
-                    sumRating: 120
-                },
-                {
-                    id: 4,
-                    name: "Nguyễn Văn A",
-                    img: "/placeholder.svg",
-                    slug: "Nguyen-Van-A-00004",
-                    specialty: "Chuyên khoa Tim mạch",
-                    rating: 3.7,
-                    sumRating: 120
+            const doctor = await HomeSV.doctors()
+            const rs = doctor.map(item => {
+                const i = {
+                    id: item.id,
+                    img: item.img,
+                    slug: item.slug,
+                    rating: item.rating,
+                    sumRating: item.sumRating,
+                    specialty: item.specialty?.name ??"",
+                    name: item.user?.name ?? "",
                 }
-            ]
+                return i
+            })
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -49,15 +25,10 @@ class Home {
     }
     static async specialties(req, res, next) {
         try {
-            const rs = [
-                { icon: "Brain", name: "Thần kinh", slug: "than-kinh" },
-                { icon: "Heart", name: "Tim mạch", slug: "tim-mach" },
-                { icon: "Eye", name: "Mắt", slug: "mat" },
-                { icon: "Bone", name: "Cơ xương khớp", slug: "co-xuong-khop" },
-                { icon: "Baby", name: "Nhi khoa", slug: "nhi-khoa" },
-                { icon: "Stethoscope", name: "Tai mũi họng", slug: "tai-mui-hong" },
-            ]
-            resOk(res, rs);
+
+
+            const specialties = await HomeSV.specialties()
+            resOk(res, specialties);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

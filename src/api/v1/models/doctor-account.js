@@ -1,19 +1,19 @@
 const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
-const User = require('./user');
+const Doctor = require('./doctor');
 
-const Account = db.define('Account', {
+const DoctorAccount = db.define('doctorAccount', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  userId: {
+  doctorId: {
     type: DataTypes.INTEGER,
-    field: 'user_id',
+    field: 'doctor_id',
     references: {
-      model: User,
+      model: Doctor,
       key: "id"
     }
   },
@@ -21,10 +21,10 @@ const Account = db.define('Account', {
   password: DataTypes.TEXT,
 
 }, {
-  tableName: 'account',
+  tableName: 'doctor_account',
   timestamps: false
 });
 
-Account.hasOne(User, {foreignKey: "userId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+DoctorAccount.belongsTo(Doctor, {foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-module.exports = Account;
+module.exports = DoctorAccount;

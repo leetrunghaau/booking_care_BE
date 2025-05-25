@@ -28,6 +28,6 @@ const Schedule= db.define("schedule", {
   timestamps: false,
 });
 
-ScheduleSetting.belongsTo(Doctor, { foreignKey: "doctorId" });
+Schedule.belongsTo(Doctor, { foreignKey: "doctorId" , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
 
-module.exports = ScheduleSetting;
+module.exports = Schedule;

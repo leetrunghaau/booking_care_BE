@@ -1,5 +1,5 @@
 // database.js
-
+require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
@@ -8,32 +8,32 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
   timezone: '+07:00'
 });
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Database connection has been established successfully.');
-  })
-  .catch((error) => {
-    console.error('Unable to connect to the database:', error);
-  });
 
-// Đồng bộ hóa model với cơ sở dữ liệu
-// sequelize.sync()
-//   .then(() => {
-//     console.log('Cơ sở dữ liệu đã được đồng bộ hóa');
-//   })
-//   .catch((error) => {
-//     console.error('Lỗi khi đồng bộ hóa cơ sở dữ liệu:', error);
-//   });
+const rs = process.env.DB_RESET
 
-// Đồng bộ hóa model với cơ sở dữ liệu và tự động tạo cơ sở dữ liệu mới nếu nó chưa tồn tại
-// sequelize.sync({ force: true }) // Thêm tùy chọn { force: true }
-//   .then(() => {
-//     console.log('Cơ sở dữ liệu đã được đồng bộ hóa và tạo mới nếu cần');
-//   })
-//   .catch((error) => {
-//     console.error('Lỗi khi đồng bộ hóa cơ sở dữ liệu:', error);
-//   });
+if (rs == 'i') {
+  sequelize.sync({ force: true }) 
+    .then(() => {
+
+      console.log('Reset database thành công');
+    })
+    .catch((error) => {
+      console.error('Lỗi khi đồng bộ hóa cơ sở dữ liệu:', error);
+    });
+} else {
+  sequelize
+    .authenticate()
+    .then(() => {
+      console.log('Database connection thành công');
+    })
+    .catch((error) => {
+      console.error('Unable to connect to the database:', error);
+    });
+
+}
+
+
+
 
 
 module.exports = sequelize;

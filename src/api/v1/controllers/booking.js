@@ -5,77 +5,77 @@ class Booking {
     static async specialties(req, res, next) {
         try {
             const rs = [
-    {
-        id: 1,
-        name: "Tim mạch",
-        description: "Các vấn đề về tim và mạch máu",
-        icon: "Heart",
-        symptoms: ["Đau ngực", "Khó thở", "Tim đập nhanh", "Huyết áp cao", "Chóng mặt"],
-    },
-    {
-        id: 2,
-        name: "Thần kinh",
-        description: "Các vấn đề về hệ thần kinh",
-        icon: "Brain",
-        symptoms: ["Đau đầu", "Chóng mặt", "Mất ngủ", "Stress", "Lo âu", "Trầm cảm"],
-    },
-    {
-        id: 3,
-        name: "Cơ xương khớp",
-        description: "Các vấn đề về xương, khớp và cơ",
-        icon: "Bone",
-        symptoms: ["Đau lưng", "Đau khớp", "Đau cơ", "Cứng khớp", "Sưng khớp"],
-    },
-    {
-        id: 4,
-        name: "Mắt",
-        description: "Các vấn đề về mắt và thị lực",
-        icon: "Eye",
-        symptoms: ["Mờ mắt", "Đau mắt", "Khô mắt", "Ngứa mắt", "Chảy nước mắt"],
-    },
-    {
-        id: 5,
-        name: "Tai mũi họng",
-        description: "Các vấn đề về tai, mũi, họng",
-        icon: "Ear",
-        symptoms: ["Đau họng", "Nghẹt mũi", "Ho", "Sốt", "Đau tai"],
-    },
-    {
-        id: 6,
-        name: "Sản phụ khoa",
-        description: "Chăm sóc sức khỏe phụ nữ",
-        icon: "Baby",
-        symptoms: ["Đau bụng kinh", "Rối loạn kinh nguyệt", "Khám thai", "Tư vấn KB"],
-    },
-    {
-        id: 7,
-        name: "Nhi khoa",
-        description: "Chăm sóc sức khỏe trẻ em",
-        icon: "Users",
-        symptoms: ["Sốt", "Ho", "Tiêu chảy", "Khám định kỳ", "Tiêm chủng"],
-    },
-    {
-        id: 8,
-        name: "Nội khoa",
-        description: "Khám và điều trị bệnh nội khoa",
-        icon: "Stethoscope",
-        symptoms: ["Đau bụng", "Buồn nôn", "Mệt mỏi", "Sốt", "Khó tiêu"],
-    },
-    {
-        id: 9,
-        name: "Da liễu",
-        description: "Các vấn đề về da và tóc",
-        icon: "Activity",
-        symptoms: ["Ngứa da", "Phát ban", "Mụn", "Rụng tóc", "Nấm da"],
-    },
-    {
-        id: 10,
-        name: "Tổng quát",
-        description: "Khám sức khỏe tổng quát",
-        icon: "UserCheck",
-        symptoms: ["Khám định kỳ", "Tư vấn sức khỏe", "Xét nghiệm", "Chưa rõ triệu chứng"],
-    },
-]
+                {
+                    id: 1,
+                    name: "Tim mạch",
+                    description: "Các vấn đề về tim và mạch máu",
+                    icon: "Heart",
+                    symptoms: ["Đau ngực", "Khó thở", "Tim đập nhanh", "Huyết áp cao", "Chóng mặt"],
+                },
+                {
+                    id: 2,
+                    name: "Thần kinh",
+                    description: "Các vấn đề về hệ thần kinh",
+                    icon: "Brain",
+                    symptoms: ["Đau đầu", "Chóng mặt", "Mất ngủ", "Stress", "Lo âu", "Trầm cảm"],
+                },
+                {
+                    id: 3,
+                    name: "Cơ xương khớp",
+                    description: "Các vấn đề về xương, khớp và cơ",
+                    icon: "Bone",
+                    symptoms: ["Đau lưng", "Đau khớp", "Đau cơ", "Cứng khớp", "Sưng khớp"],
+                },
+                {
+                    id: 4,
+                    name: "Mắt",
+                    description: "Các vấn đề về mắt và thị lực",
+                    icon: "Eye",
+                    symptoms: ["Mờ mắt", "Đau mắt", "Khô mắt", "Ngứa mắt", "Chảy nước mắt"],
+                },
+                {
+                    id: 5,
+                    name: "Tai mũi họng",
+                    description: "Các vấn đề về tai, mũi, họng",
+                    icon: "Ear",
+                    symptoms: ["Đau họng", "Nghẹt mũi", "Ho", "Sốt", "Đau tai"],
+                },
+                {
+                    id: 6,
+                    name: "Sản phụ khoa",
+                    description: "Chăm sóc sức khỏe phụ nữ",
+                    icon: "Baby",
+                    symptoms: ["Đau bụng kinh", "Rối loạn kinh nguyệt", "Khám thai", "Tư vấn KB"],
+                },
+                {
+                    id: 7,
+                    name: "Nhi khoa",
+                    description: "Chăm sóc sức khỏe trẻ em",
+                    icon: "Users",
+                    symptoms: ["Sốt", "Ho", "Tiêu chảy", "Khám định kỳ", "Tiêm chủng"],
+                },
+                {
+                    id: 8,
+                    name: "Nội khoa",
+                    description: "Khám và điều trị bệnh nội khoa",
+                    icon: "Stethoscope",
+                    symptoms: ["Đau bụng", "Buồn nôn", "Mệt mỏi", "Sốt", "Khó tiêu"],
+                },
+                {
+                    id: 9,
+                    name: "Da liễu",
+                    description: "Các vấn đề về da và tóc",
+                    icon: "Activity",
+                    symptoms: ["Ngứa da", "Phát ban", "Mụn", "Rụng tóc", "Nấm da"],
+                },
+                {
+                    id: 10,
+                    name: "Tổng quát",
+                    description: "Khám sức khỏe tổng quát",
+                    icon: "UserCheck",
+                    symptoms: ["Khám định kỳ", "Tư vấn sức khỏe", "Xét nghiệm", "Chưa rõ triệu chứng"],
+                },
+            ]
 
             resOk(res, rs);
         } catch (error) {
@@ -108,7 +108,7 @@ class Booking {
                 { id: 3, name: "Pediatrics", icon: "baby" },
             ];
 
-             const hospitals = [
+            const hospitals = [
                 {
                     id: 1,
                     name: "Bệnh viện Đại học Y Dược TP.HCM",
@@ -135,7 +135,7 @@ class Booking {
                 },
             ]
 
-             const doctors = [
+            const doctors = [
                 {
                     id: 1,
                     img: "https://randomuser.me/api/portraits/men/45.jpg",

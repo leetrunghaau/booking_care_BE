@@ -46,22 +46,11 @@ class DoctorSite {
             return next(createError.InternalServerError());
         }
     }
-    static async one(req, res, next) {
+    static async oneBySlug(req, res, next) {
         try {
-            const rs = {
-                id: 1,
-                name: "Bác sĩ Nguyễn Văn A",
-                img: "/placeholder.svg?height=300&width=300",
-                title: "Tiến sĩ, Bác sĩ chuyên khoa II",
-                specialty: "Tim mạch",
-                hospital: "Bệnh viện Đại học Y Hà Nội",
-                experience: 15,
-                rating: 4.9,
-                reviewCount: 124,
-                price: "350.000 - 500.000",
-                address: "1 Tôn Thất Tùng, Đống Đa, Hà Nội",
-                specializations: ["Bệnh mạch vành", "Rối loạn nhịp tim", "Suy tim", "Tăng huyết áp", "Bệnh van tim"],
-            }
+            const rs = await DoctorSiteSV.oneBySlug(req.params.slug)
+            console.log("slug", req.params.slug)
+            console.log("slug", rs)
             resOk(res, rs);
         } catch (error) {
             console.log(error);

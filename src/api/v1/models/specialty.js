@@ -13,7 +13,7 @@ const Specialty = db.define("specialty", {
         comment: "name + id (6 dg)"
     },
     img: DataTypes.STRING(255),
-    icon: DataTypes.STRING(128),
+    icon: DataTypes.STRING(128), //tên incon trong thư viện lucide
     name: DataTypes.STRING(255),
     title: {
         type: DataTypes.TEXT,

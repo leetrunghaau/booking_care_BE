@@ -48,6 +48,6 @@ const NotificationPatient = db.define('notificationPatient', {
   timestamps: false,
 });
 
-NotificationPatient.belongsTo(Patient, { foreignKey: 'patientId' });
+NotificationPatient.belongsTo(Patient, { foreignKey: 'patientId' , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
 
 module.exports = NotificationPatient;

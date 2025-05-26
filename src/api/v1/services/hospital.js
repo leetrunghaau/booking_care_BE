@@ -17,7 +17,7 @@ class HospitalSV {
     }
 
      static async doctorsById(id) {
-        return Doctor.findAll({where: {hospitalId: id}, include:[{model: Specialty}, {model: User}]})
+        return Doctor.findAll({where: {hospitalId: id}, include:[{model: Specialty}]})
     }
 
     static async specialtiesById(id) {

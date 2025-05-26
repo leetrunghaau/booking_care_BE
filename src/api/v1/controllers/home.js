@@ -5,19 +5,8 @@ class Home {
     static async doctors(req, res, next) {
         try {
             const doctor = await HomeSV.doctors()
-            const rs = doctor.map(item => {
-                const i = {
-                    id: item.id,
-                    img: item.img,
-                    slug: item.slug,
-                    rating: item.rating,
-                    sumRating: item.sumRating,
-                    specialty: item.specialty?.name ??"",
-                    name: item.user?.name ?? "",
-                }
-                return i
-            })
-            resOk(res, rs);
+            
+            resOk(res, doctor);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

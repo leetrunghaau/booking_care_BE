@@ -52,6 +52,6 @@ const TimeSlot = db.define('timeSlot', {
 });
 
 // Thiết lập liên kết với bảng Doctor
-TimeSlot.belongsTo(Doctor, { foreignKey: "doctorId" });
+TimeSlot.belongsTo(Doctor, { foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 module.exports = TimeSlot;

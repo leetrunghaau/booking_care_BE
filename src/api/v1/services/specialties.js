@@ -11,10 +11,9 @@ class SpecialtiesSV {
         });
     }
 
-    static async oneBySlug(slug, att) {
+    static async oneBySlug(slug) {
         return Specialty.findOne({
-            where: { slug: slug },
-            attributes: att
+            where: { slug: slug }
         });
     }
 
@@ -22,7 +21,6 @@ class SpecialtiesSV {
         return Doctor.findAll({
             where: { specialtyId: id },
             include:[
-                {model: User},
                 {model: Specialty}
             ]
         });

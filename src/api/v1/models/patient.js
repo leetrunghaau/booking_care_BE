@@ -12,7 +12,7 @@ const Patient = db.define('patient', {
 
   phone: DataTypes.STRING(16),
   email: DataTypes.STRING(50),
-
+  img: DataTypes.STRING(255),
   createdAt: { type: DataTypes.DATE, field: 'created_at' },
   verified: DataTypes.DATE,
 

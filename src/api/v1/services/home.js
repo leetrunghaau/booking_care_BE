@@ -17,10 +17,10 @@ class HomeSV {
 
     static async doctors() {
         return Doctor.findAll({
-            attributes: ['id', 'img', 'slug', "rating", "sumRating"],
             limit: 4,
             include: [
-                { model: Specialty, attributes: ["name"] },
+                { model: Specialty },
+                { model: Hospital },
             ]
 
         });

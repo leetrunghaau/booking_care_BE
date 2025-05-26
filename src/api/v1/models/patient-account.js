@@ -2,16 +2,16 @@ const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Patient = require('./patient');
 
-const PantientAccount = db.define('pantientAccount', {
+const PatientAccount = db.define('patientAccount', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
 
-  pantientId: {
+  patientId: {
     type: DataTypes.INTEGER,
-    field: 'Patient',
+    field: 'patient_id',  // sửa field cho đúng
     references: {
       model: Patient,
       key: "id"
@@ -21,10 +21,10 @@ const PantientAccount = db.define('pantientAccount', {
   password: DataTypes.TEXT,
 
 }, {
-  tableName: 'pantient_account',
+  tableName: 'patient_account',  // sửa tên bảng đúng
   timestamps: false
 });
 
-PantientAccount.belongsTo(Patient, {foreignKey: "pantientId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+PatientAccount.belongsTo(Patient, {foreignKey: "patientId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-module.exports = PantientAccount;
+module.exports = PatientAccount;

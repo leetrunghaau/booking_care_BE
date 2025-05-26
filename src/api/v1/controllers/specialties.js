@@ -15,10 +15,10 @@ class Specialties {
     }
     static async oneBySlug(req, res, next) {
         try {
-
-
-            const specialty = await SpecialtiesSV.oneBySlug(req.params.slug, ["id", "name", "icon", "description", "img", "commonDiseases", "advantages", "faqs"])
+            console.log("poind 1")
+            const specialty = await SpecialtiesSV.oneBySlug(req.params.slug)
             if (!specialty) {
+                console.log("nulll")
                 resOk(res, null)
                 return;
             }
@@ -28,16 +28,9 @@ class Specialties {
             const hospitals = await SpecialtiesSV.hospitals(ids)
 
             const rs = {
-                id: specialty.id,
-                name: specialty.name,
-                icon: specialty.icon,
-                description: specialty.description,
-                img: specialty.img,
-                commonDiseases: specialty.commonDiseases,
-                advantages: specialty.advantages,
-                faqs: specialty.faqs,
-                hospitals: hospitals.map(i => (({ slug: i.slug, name: i.name, address: i.address, thumbnail: i.thumbnail }))),
-                doctors: doctors.map(i => ({ id: i.id, name: i.user?.name ?? "", title: i.specialty?.name ?? "", img: i.img, rating: i.rating, sumRating: i.sumRating }))
+                specialty: specialty,
+                hospitals: hospitals,
+                doctors: doctors
             }
 
             // nối kết quả

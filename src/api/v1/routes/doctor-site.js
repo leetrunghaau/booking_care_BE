@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/doctor-site/address",DoctorSite.address);
 router.get("/doctor-site/specialties",DoctorSite.spesialties);
 router.get("/doctor-site/doctors",DoctorSite.all);
-router.get("/doctor-site/doctor/:slug",DoctorSite.one);
+router.get("/doctor-site/doctor/:slug",DoctorSite.oneBySlug);
 router.get("/doctor-site/doctor/:id/about",DoctorSite.doctorAbout);
 router.get("/doctor-site/doctor/:id/experience",DoctorSite.doctorExperience);
 router.get("/doctor-site/doctor/:id/review",DoctorSite.doctorReview);

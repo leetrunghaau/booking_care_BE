@@ -6,11 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon  src/api/server.js",
-    "build": "babel src/api -d build"
+    "build": "babel src/api -d build",
+    "up": "sequelize-cli db:seed:all",
+    "rs": "node src/api/v1/data/run/reset.js"
   },
   "author": "leetrunghaau",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^9.8.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

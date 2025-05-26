@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const f = require("./fake-data");
 // Import routes
 const hospital = require("./hospital");
 const doctorSite = require("./doctor-site");
@@ -18,7 +19,9 @@ const adminDoctors = require("./admin-doctor");
 const AdminFacilities = require("./admin-facilities");
 const AdminSpecialties = require("./admin-specialty");
 const AdminUsers = require("./admin-user");
+const booking = require('./booking')
 
+router.use(f);
 // Define routes
 router.use(hospital);
 router.use(doctorSite);
@@ -36,5 +39,6 @@ router.use(adminDoctors);
 router.use(AdminFacilities);
 router.use(AdminSpecialties);
 router.use(AdminUsers);
+router.use(booking)
 
 module.exports = router;

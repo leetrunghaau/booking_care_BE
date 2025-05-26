@@ -2,70 +2,79 @@ const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Hospital = require('./hospital');
 const Specialty = require('./specialty');
-const User = require('./user');
 
 const Doctor = db.define("doctor", {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  slug: {
+    type: DataTypes.STRING(255),
+    comment: "name + id (6 dg)"
+  },
 
-    slug: {
-        type: DataTypes.STRING(255),
-        comment: "name + id (6 dg)"
-    },
+  name: { type: DataTypes.STRING(20) },
+  phone: DataTypes.STRING(16),
+  email: DataTypes.STRING(50),
+  dob: { type: DataTypes.DATEONLY },
+  gender: DataTypes.ENUM('male', 'female', 'other'),
 
-    userId:{
-        type: DataTypes.INTEGER,
-        field: "usre_id",
-        references: {
-            model: User,
-            key: "id"
-        }
-    },
+  hospitalId: {
+    type: DataTypes.INTEGER,
+    field: "hospital_id",
+    references: { model: Hospital, key: "id" }
+  },
+  specialtyId: {
+    type: DataTypes.INTEGER,
+    field: "specialty_id",
+    references: { model: Specialty, key: "id" }
+  },
 
-    hospitalId:{
-        type: DataTypes.INTEGER,
-        field:"hospital_id",
-        references:{
-            model: Hospital,
-            key: "id"
-        }
-    },
+  createdAt: { type: DataTypes.DATE, field: 'created_at' },
+  verified: DataTypes.DATE,
 
-    specialtyId:{
-        type: DataTypes.INTEGER,
-        field:"specialty_id",
-        references:{
-            model: Specialty,
-            key:"id"
-        }
-    },
+  rating: {
+    type: DataTypes.DOUBLE,
+    comment: "đánh giá trung bình"
+  },
+  reviews: {
+    type: DataTypes.INTEGER,
+    comment: "tổng số lượt đánh giá"
+  },
+  img: DataTypes.TEXT,
 
-    degree: DataTypes.JSON,
-
-    technique: DataTypes.JSON,
-
-    about: DataTypes.TEXT,
-
-    prize: DataTypes.JSON,
-
-    analysis: DataTypes.JSON,
-
-    experience: DataTypes.JSON,
-
-    language:DataTypes.JSON
-    
+  about: {
+    type: DataTypes.TEXT,
+    comment: "mô tả về bác sĩ"
+  },
+  education: {
+    type: DataTypes.JSON,
+    comment: `{degree: string, school: string, year: number}[]`
+  },
+  technique: {
+    type: DataTypes.JSON,
+    comment: "string[]"
+  },
+  awards: {
+    type: DataTypes.JSON,
+    comment: `{title:string, year: number}[]`
+  },
+  analysis: {
+    type: DataTypes.JSON,
+    comment: `{ title: string, journal: string, year: number }[]`
+  },
+  experience: {
+    type: DataTypes.JSON,
+    comment: `{position: string, hospital: string, period: string}[]`
+  },
+  language: {
+    type: DataTypes.JSON,
+    comment: "string[]"
+  }
 
 }, {
-    tableName: "doctor",
-    timestamps: false
-})
+  tableName: "doctor",
+  timestamps: false
+});
 
+Doctor.belongsTo(Hospital, { foreignKey: "hospitalId" , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
+Doctor.belongsTo(Specialty, { foreignKey: "specialtyId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-Doctor.hasOne(User, {foreignKey:"userId"})
-Doctor.hasOne(Hospital, {foreignKey:"hospitalId"})
-Doctor.hasOne(Specialty, {foreignKey:"specialtyId"})
-
-module.exports = Doctor
+module.exports = Doctor;

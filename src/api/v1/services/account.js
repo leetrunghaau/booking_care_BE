@@ -7,6 +7,12 @@ class AccountSV {
     static async oneByUId(id) {
         return Account.findOne({ where: { userId: id } });
     }
+    static async up(data) {
+        return Account.create(data);
+    }
+    static async edit(id, data) {
+        return Account.update(data, { where: { id } });
+    }
 }
 
 module.exports = AccountSV;

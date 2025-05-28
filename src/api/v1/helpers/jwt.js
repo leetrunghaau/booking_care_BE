@@ -6,7 +6,7 @@ const createSortToken = async (userId) => {
     return new Promise((resolve, reject) => {
         const payload = {
             userId,
-            
+
         }
         const secret = jwtCf.sortKey;
         const option = {
@@ -33,7 +33,22 @@ const createLongToken = async (userId) => {
         })
     })
 }
-const generateVerificationToken = async(userId, dType) =>{
+const createEmailToken = async (userId) => {
+    return new Promise((resolve, reject) => {
+        const payload = {
+            userId
+        }
+        const secret = jwtCf.sortKey;
+        const option = {
+            expiresIn: jwtCf.sortTime
+        }
+        jwt.sign(payload, secret, option, (err, token) => {
+            if (err) reject(err)
+            resolve(token)
+        })
+    })
+}
+const generateVerificationToken = async (userId, dType) => {
     return new Promise((resolve, reject) => {
         const payload = {
             userId,
@@ -51,7 +66,7 @@ const generateVerificationToken = async(userId, dType) =>{
     })
 }
 
-const sigAuthToken = async(userId) =>{
+const sigAuthToken = async (userId) => {
     return new Promise((resolve, reject) => {
         const payload = {
             userId
@@ -72,5 +87,6 @@ module.exports = {
     sigAuthToken,
     createSortToken,
     createLongToken,
-    generateVerificationToken
+    generateVerificationToken,
+    createEmailToken
 }

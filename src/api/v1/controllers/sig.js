@@ -1,9 +1,14 @@
-const { createLongToken } = require("../helpers/jwt");
+const { createLongToken, createEmailToken } = require("../helpers/jwt");
 const { resOk, resErr } = require("../helpers/utils");
 const AccountSV = require("../services/account");
 const DoctorSV = require("../services/doctor");
+const PatientSV = require("../services/patient");
 const UserSV = require("../services/user");
 const createError = require("http-errors");
+const { hashPassword, comparePasswords } = require("../../v1/helpers/password-crypt");
+const { sendResetPasswordEmail } = require("../helpers/mailer");
+const jwt = require('jsonwebtoken');
+const jwtConfig = require("../../config/jwt-config");
 
 class Sig {
 
@@ -27,8 +32,8 @@ class Sig {
                 resOk(res, null, "Lỗi hệ thống")
                 return;
             }
-            // const check = await comparePasswords(input.pass, acc.pass)
-            const check = input.password == acc.pass
+            const check = await comparePasswords(input.password, acc.pass)
+            // const check = input.password == acc.pass
 
             if (!check) {
 
@@ -50,17 +55,16 @@ class Sig {
             const input = req.body
 
             //tạo user
-            const checkEmail =  await UserSV.oneEmail(input.email);
-            if (checkEmail){
+            const checkEmail = await UserSV.oneEmail(input.email);
+            if (checkEmail) {
                 resOk(res, null, "Email đã được đăng ký!")
                 return
             }
-            const user =  await UserSV.up({})
-            // tạo acc
-            // tạo patient
-
-
-            resOk(res, null);
+            const user = await UserSV.up({ email: input.email, isLock: false })
+            const pass = await hashPassword(input.password)
+            const acc = await AccountSV.up({ userId: user.id, pass: pass })
+            const patient = await PatientSV.up({ name: input.fullName, phone: input.phone, userId: user.id })
+            resOk(res, patient);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -76,7 +80,7 @@ class Sig {
                 rs = await DoctorSV.onByUId(req.user.id)
             }
             if (req.user.role == "patient") {
-                rs = await DoctorSV.onByUId(req.user.id)
+                rs = await PatientSV.oneUId(req.user.id)
             }
 
             if (!rs) {
@@ -85,6 +89,57 @@ class Sig {
             }
 
             resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async forgotPass(req, res, next) {
+        try {
+            let input = req.body
+            const user = await UserSV.oneEmail(input.email)
+            if (!user) {
+                resOk(res, rs, "Email chưa được đăng ký");
+                return;
+            }
+            const token = await createEmailToken(user.id)
+            sendResetPasswordEmail(user.email, token)
+            console.log("============ reset mail==================")
+            console.log("input reset mail", input)
+            console.log("tokent", token)
+
+            resOk(res, null);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async newPass(req, res, next) {
+        try {
+            let input = req.body // token pass
+            const payload = jwt.verify(input.token, jwtConfig.sortKey);
+            console.log("payload", payload)
+            const userId = payload.userId
+            const user = await UserSV.oneId(userId)
+
+            if (!user) {
+                resOk(res, null, "Email không có trong hệ thống")
+                return
+            }
+            const acc = await AccountSV.oneByUId(user.id)
+            if (!acc) {
+                resOk(res, null, "Lỗi hệ thống")
+                return
+            }
+            const pass = await hashPassword(input.pass)
+            const check = await AccountSV.edit(acc.id, { pass: pass })
+            if (!check) {
+                resOk(res, null, "Không lỗi được mật khẩu")
+                return
+            }
+            resOk(res, null);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

@@ -4,7 +4,7 @@ const Booking = require("../controllers/booking");
 const router = express.Router();
 
 // Define routes
-router.get("/booking/spesialties", Booking.specialties)
+router.get("/booking/specialties", Booking.specialties)
 router.get("/booking/hospitals", Booking.hospitals)
 router.get("/booking/doctors", Booking.doctors)
 router.get("/booking/doctor/:id", Booking.one)

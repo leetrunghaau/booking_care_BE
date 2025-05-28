@@ -1,6 +1,8 @@
 const createError = require('http-errors');
 const { resOk } = require('../helpers/utils');
 const DoctorSiteSV = require('../services/doctor-site');
+const DoctorSV = require('../services/doctor');
+const RatingSV = require('../services/rating');
 class DoctorSite {
     static async address(req, res, next) {
         try {
@@ -52,6 +54,62 @@ class DoctorSite {
             console.log("slug", req.params.slug)
             console.log("slug", rs)
             resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+    static async rating(req, res, next) {
+        try {
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) {
+                resOk(res, null)
+            }
+            const ratings = await RatingSV.allDId(doctor.id);
+
+            let sumRating = 0;
+            const starCounts = [0, 0, 0, 0, 0];
+
+            ratings.forEach(item => {
+                const star = Number(item.rating);
+                if (star >= 1 && star <= 5) {
+                    starCounts[star - 1] += 1;
+                    sumRating += star;
+                }
+            });
+
+            const ratingDistribution = starCounts.map((count, i) => {
+                return {
+                    stars: i + 1,
+                    percentage: ratings.length > 0 ? (count / ratings.length * 100).toFixed(0) : 0
+                };
+            }).sort((a, b) => b.stars - a.stars)
+
+            const rs = {
+                ratingDistribution,
+                avgRating: ratings.length > 0 ? (sumRating / ratings.length).toFixed(1) : 0,
+                sumRating: ratings.length,
+            };
+            resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+    static async ratings(req, res, next) {
+        try {
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) {
+                resOk(res, null)
+                return
+            }
+            console.log("p3")
+
+            const max = await RatingSV.countDId(doctor.id)
+            console.log("p1")
+            const ratings = await RatingSV.allDIdvsL(doctor.id, Number(req.params.len));
+            console.log("p2")
+            resOk(res, { max: max, rvs: ratings });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

@@ -3,4 +3,7 @@ GET http://localhost:8080/api/v1/fa
 ####
 GET http://localhost:8080/api/v1/specialty/nhi-khoa000005
 
+###
+GET http://localhost:8080/api/v1/doctor-site/doctor/pham-van-g-000007/ratings/5
+
 

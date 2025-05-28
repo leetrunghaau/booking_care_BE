@@ -10,7 +10,17 @@ const resOk = (res, data = null, mess = 'Ok') =>{
     });
 }
 
+
+const resErr = (res, status = 500, mess = 'Internal Server Error') => {
+  res.status(status).json({
+    status,
+    message: mess,
+    data: null
+  });
+};
+
 module.exports = {
     isValidEmail,
-    resOk
+    resOk,
+    resErr
 }

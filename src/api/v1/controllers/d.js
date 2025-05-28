@@ -7,9 +7,7 @@ const Doctor = require("../models/doctor");
 const HospitalSpecialty = require("../models/hospital-spacialty");
 const Patient = require("../models/patient");
 const NotificationPatient = require("../models/notification-patient");
-const PatientAccount = require("../models/patient-account");
 const Rating = require("../models/rating");
-const DoctorAccount = require("../models/doctor-account");
 const NotificationDoctor = require("../models/notification-doctor");
 const ScheduleSetting = require("../models/schedule_settings");
 const Booking = require("../models/booking");
@@ -20,8 +18,6 @@ const hospitalSpecialtiesFakeData = require("../data/f-data/hospital-spacialty")
 const fakePatients = require("../data/f-data/patient");
 const notificationPatientsFakeData = require("../data/f-data/notification-patient");
 const fakeRatings = require("../data/f-data/rating");
-const patientAccountsFakeData = require("../data/f-data/patient-account");
-const fakeDoctorAccounts = require("../data/f-data/doctor-account");
 const fakeNotificationDoctors = require("../data/f-data/notification-doctor");
 const fakeScheduleSettings = require("../data/f-data/schedule_settings");
 const fakeTimeSlots = require("../data/f-data/time-slot");
@@ -86,17 +82,7 @@ class FData {
                     resOk(res, "NotificationPatient đã tạo");
                     break;
 
-                case "6":
-                    // Tạo patient_account
-                    let patient_account = [...patientAccountsFakeData];
-                    patient_account.forEach(i => {
-                        if (i.patientId > fakePatients.length || i.patientId <= 0) {
-                            i.patientId = (i.patientId % fakePatients.length) || fakePatients.length;
-                        }
-                    });
-                    await PatientAccount.bulkCreate(patient_account);
-                    resOk(res, "PatientAccount đã tạo");
-                    break;
+     
 
                 case "7":
                     // Tạo rating
@@ -113,17 +99,7 @@ class FData {
                     resOk(res, "Rating đã tạo");
                     break;
 
-                case "8":
-                    // Tạo doctor_account
-                    let doctor_account = [...fakeDoctorAccounts];
-                    doctor_account.forEach(i => {
-                        if (i.doctorId > fakeDoctor.length || i.doctorId <= 0) {
-                            i.doctorId = (i.doctorId % fakeDoctor.length) || fakeDoctor.length;
-                        }
-                    });
-                    await DoctorAccount.bulkCreate(doctor_account);
-                    resOk(res, "DoctorAccount đã tạo");
-                    break;
+    
 
                 case "9":
                     // Tạo notification_doctor
@@ -228,14 +204,6 @@ class FData {
             });
             await NotificationPatient.bulkCreate(notification_patient);
 
-            // Tạo patient_account
-            let patient_account = [...patientAccountsFakeData];
-            patient_account.forEach(i => {
-                if (i.patientId > fakePatients.length || i.patientId <= 0) {
-                    i.patientId = (i.patientId % fakePatients.length) || fakePatients.length;
-                }
-            });
-            await PatientAccount.bulkCreate(patient_account);
 
             // Tạo rating
             let rating = [...fakeRatings];
@@ -249,15 +217,7 @@ class FData {
             });
             await Rating.bulkCreate(rating);
 
-            // Tạo doctor_account
-            let doctor_account = [...fakeDoctorAccounts];
-            doctor_account.forEach(i => {
-                if (i.doctorId > fakeDoctor.length || i.doctorId <= 0) {
-                    i.doctorId = (i.doctorId % fakeDoctor.length) || fakeDoctor.length;
-                }
-            });
-            await DoctorAccount.bulkCreate(doctor_account);
-
+           
             // Tạo notification_doctor
             let notification_doctor = [...fakeNotificationDoctors];
             notification_doctor.forEach(i => {

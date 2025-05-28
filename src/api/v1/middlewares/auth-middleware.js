@@ -1,7 +1,7 @@
 // jwtMiddleware.js
 const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
-const UserService = require('../services/user-service');
+const UserSV = require('../services/user');
 
 const noAuthMiddleware = (req, res, next) => {
 
@@ -46,22 +46,20 @@ const authorization = permission => {
         if (!req.headers['authorization']) {
             return next(createError.Unauthorized());
         }
-
         const authHeader = req.headers['authorization'];
         const bearerToken = authHeader.split(' ');
         const token = bearerToken[1];
         console.log(bearerToken[0]);
         if (bearerToken[0] != 'Bearer') {
-            return next(createError[401]('you dont have permission'));
+            return next(createError[401]('Lỗi axios'));
         }
 
         try {
             const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             console.log(payload);
 
-            req.userId = payload.userId;
-
-            const user = await UserService.getUserById(payload.userId);
+            const user = await UserSV.oneId(payload.userId);
+            
             console.log(user.role);
             console.log(permission);
 
@@ -73,6 +71,7 @@ const authorization = permission => {
             if (!permission.includes(user.role)) {
                 return next(createError[401]('you dont have permission'));
             }
+            req.user = user
 
             next();
         } catch (err) {

@@ -2,9 +2,19 @@ const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Hospital = require('./hospital');
 const Specialty = require('./specialty');
+const User = require('./user');
 
 const Doctor = db.define("doctor", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  userId: {
+    type: DataTypes.INTEGER,
+    field: 'user_id',
+    references: {
+      model: User,
+      key: 'id',
+    }
+  },
+
   slug: {
     type: DataTypes.STRING(255),
     comment: "name + id (6 dg)"
@@ -74,7 +84,8 @@ const Doctor = db.define("doctor", {
   timestamps: false
 });
 
-Doctor.belongsTo(Hospital, { foreignKey: "hospitalId" , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
+Doctor.belongsTo(Hospital, { foreignKey: "hospitalId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 Doctor.belongsTo(Specialty, { foreignKey: "specialtyId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Doctor.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE', onUpdate: 'CASCADE', });
 
 module.exports = Doctor;

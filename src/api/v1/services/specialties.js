@@ -6,9 +6,7 @@ const Specialty = require("../models/specialty");
 class SpecialtiesSV {
 
     static async all() {
-        return Specialty.findAll({
-            attributes: ['id', 'icon', 'name', 'slug', "title"]
-        });
+        return Specialty.findAll();
     }
 
     static async oneBySlug(slug) {

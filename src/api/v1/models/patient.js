@@ -1,9 +1,17 @@
 const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
+const User = require('./user');
 
 const Patient = db.define('patient', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-
+  userId: {
+    type: DataTypes.INTEGER,
+    field: 'user_id',
+    references: {
+      model: User,
+      key: 'id',
+    }
+  },
   code: { type: DataTypes.STRING(20), comment: "BN + id (6 dg)" },
 
   name: DataTypes.STRING(20),
@@ -29,6 +37,6 @@ const Patient = db.define('patient', {
   tableName: 'patient',
   timestamps: false
 });
-
+Patient.belongsTo(User, {    foreignKey: 'userId',    onDelete: 'CASCADE',    onUpdate: 'CASCADE',});
 
 module.exports = Patient;

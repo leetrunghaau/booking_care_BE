@@ -20,6 +20,7 @@ const AdminFacilities = require("./admin-facilities");
 const AdminSpecialties = require("./admin-specialty");
 const AdminUsers = require("./admin-user");
 const booking = require('./booking')
+const sig = require('./sig')
 
 router.use(f);
 // Define routes
@@ -40,5 +41,6 @@ router.use(AdminFacilities);
 router.use(AdminSpecialties);
 router.use(AdminUsers);
 router.use(booking)
+router.use(sig)
 
 module.exports = router;

@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Doctor = require('./doctor');
 
-const ScheduleSetting = db.define("scheduleSetting", {
+const Schedule = db.define("schedule", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -20,7 +20,7 @@ const ScheduleSetting = db.define("scheduleSetting", {
   },
 
   workingDays: {
-    type: DataTypes.INTEGER, 
+    type: DataTypes.JSON, 
     field: "working_days",
   },
 
@@ -69,10 +69,10 @@ const ScheduleSetting = db.define("scheduleSetting", {
   }
 
 }, {
-  tableName: "schedule_settings",
+  tableName: "schedule",
   timestamps: false,
 });
 
-ScheduleSetting.belongsTo(Doctor, { foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Schedule.belongsTo(Doctor, { foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-module.exports = ScheduleSetting;
+module.exports = Schedule;

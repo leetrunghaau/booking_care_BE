@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
 const UserSV = require('../services/user');
+const jwtConfig = require('../../config/jwt-config');
 
 const noAuthMiddleware = (req, res, next) => {
 
@@ -14,33 +15,7 @@ const noAuthMiddleware = (req, res, next) => {
 
 
 
-//   const authorization = permission =>{
-//     return async (req, res, next)=>{
-//         if (!req.headers['authorization']) {
-//             return next(createError.Unauthorized())
-//         }
-//         const authHeader = req.headers['authorization'];
-//         const bearerToken = authHeader.split(' ');
-//         const token = bearerToken[1];
-//         console.log(token);
-//         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload) => {
-//             if (err) {
-//                 return next(createError.Unauthorized(err.message));
-//             }
-//             console.log(payload);
-//             req.userId = payload.userId;
-//             const user = await UserService.getUserById(payload.userId);
-//             console.log(user);
-//             if(!user){
-//                 return next(createError[401]('Đang giả danh hả, cutsttttt :))))'))
-//             }
-//             if(!permission.includes(user.role)){
-//                 return next(createError[401]('you dont have permission'));
-//             }
-//             next();
-//         })
-//     }
-// }
+
 const authorization = permission => {
     return async (req, res, next) => {
         if (!req.headers['authorization']) {
@@ -55,7 +30,7 @@ const authorization = permission => {
         }
 
         try {
-            const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            const payload = jwt.verify(token, jwtConfig.sortKey);
             console.log(payload);
 
             const user = await UserSV.oneId(payload.userId);
@@ -79,34 +54,8 @@ const authorization = permission => {
         }
     };
 };
-const  verificationAuthorization = () =>{
-    return (req, res, next)=>{
-        if (!req.headers['authorization']) {
-            return next(createError.Unauthorized())
-        }
-        const authHeader = req.headers['authorization'];
-        const bearerToken = authHeader.split(' ');
-        const token = bearerToken[1];
-        console.log(token);
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload) => {
-            if (err) {
-                
-                return next(createError.Unauthorized(err.message));
-            }
-            console.log(payload);
-            req.userId = payload.userId;
-            req.verificationCode = payload.dType
-            const user = UserService.getUserById(payload.userId);
-            if(!user){
-                return next(createError[401]('Đang giả danh hả, cutsttttt :))))'))
-            }
-            
-            next();
-        })
-    }
-}
+
 module.exports = {
     noAuthMiddleware,
     authorization,
-    verificationAuthorization
 }

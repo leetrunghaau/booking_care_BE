@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const f = require("./fake-data");
+// const f = require("./fake-data");
 // Import routes
 const hospital = require("./hospital");
 const doctorSite = require("./doctor-site");
@@ -22,7 +22,7 @@ const AdminUsers = require("./admin-user");
 const booking = require('./booking')
 const sig = require('./sig')
 
-router.use(f);
+// router.use(f);
 // Define routes
 router.use(hospital);
 router.use(doctorSite);

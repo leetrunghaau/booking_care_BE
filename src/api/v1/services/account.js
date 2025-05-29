@@ -2,16 +2,16 @@ const Account = require("../models/account");
 
 class AccountSV {
     static async all() {
-        return Doctor.findAll({ include: [{ model: Hospital }, { model: Specialty }] });
+        return await  Account.findAll();
     }
     static async oneByUId(id) {
-        return Account.findOne({ where: { userId: id } });
+        return await  Account.findOne({ where: { userId: id } });
     }
     static async up(data) {
-        return Account.create(data);
+        return await  Account.create(data);
     }
     static async edit(id, data) {
-        return Account.update(data, { where: { id } });
+        return await  Account.update(data, { where: { id } });
     }
 }
 

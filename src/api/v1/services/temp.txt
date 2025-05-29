@@ -1,0 +1,21 @@
+
+class SV {
+    static async all() {
+        return await .findAll()
+    }
+
+    static async one(id) {
+        return await .findByPk(id)
+    }
+
+    static async up(data) {
+        return await .create(data)
+    }
+
+    static async down(id) {
+        return await .destroy({where: {id: id}})
+    }
+
+}
+
+module.exports = SV;

@@ -51,7 +51,7 @@ module.exports = {
       });
     }
 
-    await queryInterface.bulkInsert('schedule_settings', scheduleSettings, {});
+    await queryInterface.bulkInsert('schedule', scheduleSettings, {});
 
   },
 

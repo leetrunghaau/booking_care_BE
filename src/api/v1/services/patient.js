@@ -2,24 +2,24 @@ const Patient = require("../models/patient");
 
 class PatientSV {
     static async all() {
-        return Patient.findAll();
+        return await  Patient.findAll();
     }
     static async oneId(id) {
-        return Patient.findByPk(id);
+        return await  Patient.findByPk(id);
     }
      static async oneUId(id) {
-        return Patient.findOne({where: {userId: id}});
+        return await  Patient.findOne({where: {userId: id}});
     }
     static async up(data) {
-        return Patient.create(data);
+        return  await Patient.create(data);
     }
 
     static async edit(id, data) {
-        return Patient.update(data, { where: { id } });
+        return  await Patient.update(data, { where: { id } });
     }
 
     static async down(id) {
-        return Patient.destroy({ where: { id } });
+        return  await Patient.destroy({ where: { id } });
     }
 }
 

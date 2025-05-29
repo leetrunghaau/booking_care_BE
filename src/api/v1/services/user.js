@@ -2,26 +2,26 @@ const User = require("../models/user");
 
 class UserSV {
     static async all() {
-        return User.findAll();
+        return  await User.findAll();
     }
 
     static async oneId(id) {
-        return User.findByPk(id);
+        return  await User.findByPk(id);
     }
     static async oneEmail(email) {
-        return User.findOne({ where: { email: email } });
+        return  await User.findOne({ where: { email: email } });
     }
 
     static async up(data) {
-        return User.create(data);
+        return await  User.create(data);
     }
 
     static async edit(id, data) {
-        return User.update(data, { where: { id } });
+        return await  User.update(data, { where: { id } });
     }
 
     static async down(id) {
-        return User.destroy({ where: { id } });
+        return await  User.destroy({ where: { id } });
     }
 }
 

@@ -8,7 +8,7 @@ const Specialty = require("../models/specialty");
 class HomeSV {
 
     static async specialties() {
-        return Specialty.findAll({
+        return  await Specialty.findAll({
             attributes: ['id', 'icon', 'name', 'slug'],
             limit: 6
         });
@@ -16,7 +16,7 @@ class HomeSV {
 
 
     static async doctors() {
-        return Doctor.findAll({
+        return await  Doctor.findAll({
             limit: 4,
             include: [
                 { model: Specialty },

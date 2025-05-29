@@ -24,95 +24,147 @@ const createTransport = () => {
     });
 }
 
-const sendCodeForRegister = (to, verificationCode) => {
-    const content = (code) => {
-        const rs = `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-        <div style="margin:50px auto;width:70%;padding:20px 0">
-          <div style="border-bottom:1px solid #eee">
-            <a href="https://www.youtube.com/watch?v=FJLAnvSCieA" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Math Solver VN</a>
-          </div>
-          <p style="font-size:1.1em">Hi,</p>
-          <p>Thank you for choosing Math Solver VN. Use the following OTP to complete your Sign Up procedures. OTP is valid for 60 minutes</p>
-          <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${code}</h2>
-          <p style="font-size:0.9em;">Regards,<br />Your Brand</p>
-          <hr style="border:none;border-top:1px solid #eee" />
-          <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-            <p>Your Brand Inc</p>
-            <p>1600 Amphitheatre Parkway</p>
-            <p>California</p>
-          </div>
-        </div>  
-      </div>`;
-        return rs;
-    }
-    const transport = createTransport();
-    const mailSender = sendMail(transport);
-    mailSender(to,` ${verificationCode} là mã xác thực tài khoản của bạn`, content(verificationCode));
-}
-const sendCodeForResetPassword =  (to, verificationCode) => {
-    const content = (code) => {
-        const rs = `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-        <div style="margin:50px auto;width:70%;padding:20px 0">
-          <div style="border-bottom:1px solid #eee">
-            <a href="https://www.youtube.com/watch?v=FJLAnvSCieA" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Math Solver VN</a>
-          </div>
-          <p style="font-size:1.1em">Hi,</p>
-          <p>Thank you for choosing Math Solver VN. Use the following OTP to complete your Reset your password procedures. OTP is valid for 60 minutes</p>
-          <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${code}</h2>
-          <p style="font-size:0.9em;">Regards,<br />Your Brand</p>
-          <hr style="border:none;border-top:1px solid #eee" />
-          <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-            <p>Your Brand Inc</p>
-            <p>1600 Amphitheatre Parkway</p>
-            <p>California</p>
-          </div>
-        </div>  
-      </div>`;
-        return rs;
-    }
-    const transport = createTransport();
-    const mailSender = sendMail(transport);
-    mailSender(to,` ${verificationCode} là mã xác thực tài khoản của bạn`, content(verificationCode));
-}
+
 const sendResetPasswordEmail = (to, token) => {
+  const resetLink = `${mailConfig.FE_SERVER}/${mailConfig.FE_NEW_PASS_LINK}?token=${token}`;
+
   const content = (link) => {
     return `
-      <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-        <div style="margin:50px auto;width:70%;padding:20px 0">
-          <div style="border-bottom:1px solid #eee">
-            <a href="https://www.youtube.com/watch?v=FJLAnvSCieA" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Math Solver VN</a>
+      <div style="font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f4f4; padding: 40px 0;">
+        <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- LOGO & BRAND -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <!-- Custom SVG logo -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 2v2"/>
+                <path d="M5 2v2"/>
+                <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/>
+                <path d="M8 15a6 6 0 0 0 12 0v-3"/>
+                <circle cx="20" cy="10" r="2"/>
+              </svg>
+              <h2 style="color: #0d9488; margin: 0;">BookingCare</h2>
+            </div>
           </div>
-          <p style="font-size:1.1em">Hi,</p>
-          <p>We received a request to reset your password for your Math Solver VN account. Click the button below to set a new password. This link is valid for 60 minutes.</p>
-          <a href="${link}" style="display:inline-block;margin:20px 0;padding:10px 20px;background-color:#00466a;color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;">Reset Password</a>
-          <p>If you did not request a password reset, please ignore this email.</p>
-          <p style="font-size:0.9em;">Regards,<br />Your Brand</p>
-          <hr style="border:none;border-top:1px solid #eee" />
-          <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-            <p>Your Brand Inc</p>
-            <p>1600 Amphitheatre Parkway</p>
-            <p>California</p>
+
+          <!-- MAIN CONTENT -->
+          <h3 style="color: #333; margin-bottom: 20px;">Yêu cầu đặt lại mật khẩu</h3>
+          <p style="font-size: 16px; color: #333;">Xin chào,</p>
+          <p style="font-size: 16px; color: #333;">
+            Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại <strong>BookingCare</strong>.
+          </p>
+          <p style="font-size: 16px; color: #333;">
+            Nhấn vào nút bên dưới để tiến hành đặt lại mật khẩu:
+          </p>
+
+          <!-- BUTTON -->
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${link}" style="background-color: #0d9488; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+              Đặt lại mật khẩu
+            </a>
           </div>
-        </div>  
+
+          <p style="font-size: 14px; color: #666;">
+            Nếu bạn không yêu cầu thay đổi mật khẩu, bạn có thể bỏ qua email này. Liên kết sẽ hết hạn sau 24 giờ để bảo vệ tài khoản của bạn.
+          </p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+          <!-- FOOTER -->
+          <p style="font-size: 14px; color: #999; text-align: center;">
+            Cần hỗ trợ? Liên hệ chúng tôi qua email: <a href="mailto:${mailConfig.MAIL_SUPPORT}" style="color: #0d9488;">${mailConfig.MAIL_SUPPORT}</a><br />
+            Hoặc truy cập <a href="${mailConfig.FE_SERVER}" style="color: #0d9488;">${mailConfig.FE_SERVER}</a>
+          </p>
+
+          <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 20px;">
+            © 2025 BookingCare. Email được gửi tự động, vui lòng không phản hồi.
+          </p>
+        </div>
       </div>
     `;
   };
 
   const transport = createTransport(); 
   const mailSender = sendMail(transport); 
-  const resetLink = `${mailConfig.FE_SERVER}/${mailConfig.FE_NEW_PASS_LINK}?token=${token}`
 
-  mailSender(
+  return mailSender({
     to,
-    `Đặt lại mật khẩu tài khoản ${mailConfig.FROM_NAME}`,
-    content(resetLink)
-  );
+    subject: 'Yêu cầu đặt lại mật khẩu - BookingCare',
+    html: content(resetLink)
+  });
+};
+
+const sendVerifyEmail = (to, token) => {
+  const verifyLink = `${mailConfig.FE_SERVER}/${mailConfig.FE_VERIFY_EMAIL_LINK}?token=${token}`;
+
+  const content = (link) => {
+    return `
+      <div style="font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f4f4; padding: 40px 0;">
+        <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- LOGO & BRAND -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <!-- Custom SVG logo -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 2v2"/>
+                <path d="M5 2v2"/>
+                <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/>
+                <path d="M8 15a6 6 0 0 0 12 0v-3"/>
+                <circle cx="20" cy="10" r="2"/>
+              </svg>
+              <h2 style="color: #0d9488; margin: 0;">BookingCare</h2>
+            </div>
+          </div>
+
+          <!-- MAIN CONTENT -->
+          <h3 style="color: #333; margin-bottom: 20px;">Xác thực địa chỉ email</h3>
+          <p style="font-size: 16px; color: #333;">Xin chào,</p>
+          <p style="font-size: 16px; color: #333;">
+            Cảm ơn bạn đã đăng ký tài khoản tại <strong>BookingCare</strong>. Vui lòng nhấn nút bên dưới để xác thực địa chỉ email của bạn.
+          </p>
+
+          <!-- BUTTON -->
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${link}" style="background-color: #0d9488; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+              Xác thực email
+            </a>
+          </div>
+
+          <p style="font-size: 14px; color: #666;">
+            Nếu bạn không tạo tài khoản hoặc không yêu cầu xác thực, vui lòng bỏ qua email này. Liên kết sẽ hết hạn sau 24 giờ.
+          </p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+          <!-- FOOTER -->
+          <p style="font-size: 14px; color: #999; text-align: center;">
+            Cần hỗ trợ? Liên hệ chúng tôi qua email: <a href="mailto:${mailConfig.MAIL_SUPPORT}" style="color: #0d9488;">${mailConfig.MAIL_SUPPORT}</a><br />
+            Hoặc truy cập <a href="${mailConfig.FE_SERVER}" style="color: #0d9488;">${mailConfig.FE_SERVER}</a>
+          </p>
+
+          <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 20px;">
+            © 2025 BookingCare. Email được gửi tự động, vui lòng không phản hồi.
+          </p>
+        </div>
+      </div>
+    `;
+  };
+
+  const transport = createTransport(); 
+  const mailSender = sendMail(transport); 
+
+  return mailSender({
+    to,
+    subject: 'Xác thực email của bạn - BookingCare',
+    html: content(verifyLink)
+  });
 };
 
 
 module.exports = {
-    sendCodeForRegister,
-    sendCodeForResetPassword,
-    sendResetPasswordEmail
+    sendResetPasswordEmail,
+    sendVerifyEmail
 
 }

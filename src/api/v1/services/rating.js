@@ -4,16 +4,16 @@ const Rating = require("../models/rating");
 
 class RatingSV {
     static async all() {
-        return Rating.findAll({ include: [{ model: Hospital }, { model: Specialty }] });
+        return await  Rating.findAll({ include: [{ model: Hospital }, { model: Specialty }] });
     }
     static async allDId(id) {
-        return Rating.findAll({ where: { doctorId: id }, include: [{ model: Doctor }, { model: Patient }] });
+        return await  Rating.findAll({ where: { doctorId: id }, include: [{ model: Doctor }, { model: Patient }] });
     }
     static async countDId(id) {
-        return Rating.count({ where: { doctorId: id } });
+        return await  Rating.count({ where: { doctorId: id } });
     }
     static async allDIdvsL(id, len) {
-        return Rating.findAll({ where: { doctorId: id }, limit: len , include: [{ model: Doctor }, { model: Patient }]});
+        return await  Rating.findAll({ where: { doctorId: id }, limit: len , include: [{ model: Doctor }, { model: Patient }]});
     }
 }
 

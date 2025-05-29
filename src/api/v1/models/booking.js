@@ -46,6 +46,13 @@ const Booking = db.define('booking', {
     comment: 'Trạng thái lịch hẹn',
   },
 
+  type: {
+    type: DataTypes.ENUM("default", "followUp", "newPatient", "onDemand", "routineCheckup", "specialistVisit", "telemedicine", "emergency", "consultation", "vaccination", "labTest"),
+    field: "booking_type",
+    defaultValue: 'default',
+    comment: 'Loại lịch hẹn',
+  },
+
   notes: {
     type: DataTypes.TEXT,
     allowNull: true,
@@ -64,6 +71,6 @@ const Booking = db.define('booking', {
 
 // Quan hệ
 Booking.belongsTo(Patient, { foreignKey: 'patientId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-Booking.belongsTo(Doctor, { foreignKey: 'doctorId' , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
+Booking.belongsTo(Doctor, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 module.exports = Booking;

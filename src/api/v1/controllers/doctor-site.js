@@ -1,20 +1,23 @@
 const createError = require('http-errors');
 const { resOk } = require('../helpers/utils');
-const DoctorSiteSV = require('../services/doctor-site');
 const DoctorSV = require('../services/doctor');
 const RatingSV = require('../services/rating');
+const ScheduleSV = require('../services/schedule');
+const BookingSV = require('../services/Booking');
+const { DATEONLY } = require('sequelize');
+const generateTimeSlots = require('../helpers/time');
+const SpecialtiesSV = require('../services/specialties');
+const HospitalSV = require('../services/hospital');
+const { createListAddress } = require('../helpers/addresss');
 class DoctorSite {
-    static async address(req, res, next) {
+    static async addresses(req, res, next) {
         try {
-            const rs = [
-                { slug: "noi-tong-hop", name: "Nội tổng hợp" },
-                { slug: "nhi-khoa", name: "Nhi khoa" },
-                { slug: "da-lieu", name: "Da liễu" },
-                { slug: "rang-ham-mat", name: "Răng - Hàm - Mặt" },
-                { slug: "mat", name: "Mắt" },
-                { slug: "san-phu-khoa", name: "Sản phụ khoa" },
-            ];
 
+            const hospital = await HospitalSV.all()
+            const listFullAddress = hospital.map(i => i.address)
+            //tìm địa chỉ của user
+            //niếu có đăng nhập thì lấy thứ tự tìm, address -> danh sách đã khám (lấy theo địa chỉ số lần khám nhiều nhất)
+            const rs = createListAddress(listFullAddress)
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -24,14 +27,8 @@ class DoctorSite {
 
     static async spesialties(req, res, next) {
         try {
-            const rs = [
-                { slug: "ha-noi", name: "Hà Nội" },
-                { slug: "tp-ho-chi-minh", name: "TP. Hồ Chí Minh" },
-                { slug: "da-nang", name: "Đà Nẵng" },
-                { slug: "hai-phong", name: "Hải Phòng" },
-                { slug: "can-tho", name: "Cần Thơ" },
-            ];
-
+            const specialties = await SpecialtiesSV.all();
+            const rs = specialties.map(({ slug, name, icon }) => ({ slug, name, icon }));
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -41,7 +38,7 @@ class DoctorSite {
 
     static async all(req, res, next) {
         try {
-            const doctors = await DoctorSiteSV.all()
+            const doctors = await DoctorSV.all()
             resOk(res, doctors);
         } catch (error) {
             console.log(error);
@@ -50,7 +47,7 @@ class DoctorSite {
     }
     static async oneBySlug(req, res, next) {
         try {
-            const rs = await DoctorSiteSV.oneBySlug(req.params.slug)
+            const rs = await DoctorSV.oneBySlug(req.params.slug)
             console.log("slug", req.params.slug)
             console.log("slug", rs)
             resOk(res, rs);
@@ -307,19 +304,48 @@ class DoctorSite {
 
     static async doctorSchedule(req, res, next) {
         try {
-            const rs = [
-                { time: 480, available: true },   // 08:00
-                { time: 510, available: false },  // 08:30
-                { time: 540, available: true },   // 09:00
-                { time: 570, available: true },   // 09:30
-                { time: 600, available: false },  // 10:00
-                { time: 630, available: true },   // 10:30
-                { time: 660, available: true },   // 11:00
-                { time: 690, available: false },  // 11:30
-                { time: 720, available: true },   // 12:00
-                { time: 750, available: false }   // 12:30
-            ];
-            resOk(res, rs);
+           
+
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) {
+                resOk(res, null, "Lỗi tuy vấn")
+                return
+            }
+
+            const schedule = await ScheduleSV.mainDId(doctor.id)
+            if (!schedule) {
+                resOk(res, [])
+                return
+            }
+            const bookings = await BookingSV.allByDidADate(doctor.id, req.params.day);
+
+            const bookedTimes = bookings.map(i => {
+                const [h, m] = i.bookingTime.split(':').map(Number);
+                return h * 60 + m + 1;
+            });
+
+            const timeSlots = generateTimeSlots(schedule);
+
+            const times = timeSlots.map(slot => {
+                const [hStart, mStart] = slot.start.split(':').map(Number);
+                const [hEnd, mEnd] = slot.end.split(':').map(Number);
+                const slotStart = hStart * 60 + mStart;
+                const slotEnd = hEnd * 60 + mEnd;
+
+                const isBooked = bookedTimes.some(bookingTime => {
+                    return (bookingTime >= slotStart && bookingTime <= slotEnd)
+                });
+
+                return {
+                    ...slot,
+                    available: !isBooked
+                };
+            });
+
+
+            const appointmentDuration = schedule.appointmentDuration;
+            console.log("===============>", bookedTimes)
+            resOk(res, times);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

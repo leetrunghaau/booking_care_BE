@@ -9,7 +9,7 @@ const Patient = require("../models/patient");
 const NotificationPatient = require("../models/notification-patient");
 const Rating = require("../models/rating");
 const NotificationDoctor = require("../models/notification-doctor");
-const ScheduleSetting = require("../models/schedule_settings");
+const ScheduleSetting = require("../models/schedule");
 const Booking = require("../models/booking");
 const TimeSlot = require("../models/time-slot");
 const fakeHospitals = require("../data/f-data/hospital");
@@ -19,7 +19,7 @@ const fakePatients = require("../data/f-data/patient");
 const notificationPatientsFakeData = require("../data/f-data/notification-patient");
 const fakeRatings = require("../data/f-data/rating");
 const fakeNotificationDoctors = require("../data/f-data/notification-doctor");
-const fakeScheduleSettings = require("../data/f-data/schedule_settings");
+const fakeScheduleSettings = require("../data/f-data/schedule");
 const fakeTimeSlots = require("../data/f-data/time-slot");
 const fakeBookings = require("../data/f-data/booking");
 
@@ -114,14 +114,14 @@ class FData {
                     break;
 
                 case "10":
-                    // Tạo schedule_settings
-                    let schedule_settings = [...fakeScheduleSettings];
-                    schedule_settings.forEach(i => {
+                    // Tạo schedule
+                    let schedule = [...fakeScheduleSettings];
+                    schedule.forEach(i => {
                         if (i.doctorId > fakeDoctor.length || i.doctorId <= 0) {
                             i.doctorId = (i.doctorId % fakeDoctor.length) || fakeDoctor.length;
                         }
                     });
-                    await ScheduleSetting.bulkCreate(schedule_settings);
+                    await ScheduleSetting.bulkCreate(schedule);
                     resOk(res, "ScheduleSetting đã tạo");
                     break;
 
@@ -227,14 +227,14 @@ class FData {
             });
             await NotificationDoctor.bulkCreate(notification_doctor);
 
-            // Tạo schedule_settings
-            let schedule_settings = [...fakeScheduleSettings];
-            schedule_settings.forEach(i => {
+            // Tạo schedule
+            let schedule = [...fakeScheduleSettings];
+            schedule.forEach(i => {
                 if (i.doctorId > fakeDoctor.length || i.doctorId <= 0) {
                     i.doctorId = (i.doctorId % fakeDoctor.length) || fakeDoctor.length;
                 }
             });
-            await ScheduleSetting.bulkCreate(schedule_settings);
+            await ScheduleSetting.bulkCreate(schedule);
 
             // Tạo bookings
             let bookings = [...fakeBookings];

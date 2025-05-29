@@ -39,7 +39,11 @@ const Doctor = db.define("doctor", {
 
   createdAt: { type: DataTypes.DATE, field: 'created_at' },
   verified: DataTypes.DATE,
-
+  price: DataTypes.DOUBLE,
+  duration: {
+    type: DataTypes.INTEGER,
+    field: "duration",
+  },
   rating: {
     type: DataTypes.DOUBLE,
     comment: "đánh giá trung bình"
@@ -49,10 +53,13 @@ const Doctor = db.define("doctor", {
     comment: "tổng số lượt đánh giá"
   },
   img: DataTypes.TEXT,
-
   about: {
     type: DataTypes.TEXT,
     comment: "mô tả về bác sĩ"
+  },
+  address: {
+    type: DataTypes.TEXT,
+    comment: "địa chỉ của bác sĩ"
   },
   education: {
     type: DataTypes.JSON,

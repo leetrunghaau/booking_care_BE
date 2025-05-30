@@ -52,7 +52,6 @@ const Booking = db.define('booking', {
     defaultValue: 'default',
     comment: 'Loại lịch hẹn',
   },
-
   notes: {
     type: DataTypes.TEXT,
     allowNull: true,

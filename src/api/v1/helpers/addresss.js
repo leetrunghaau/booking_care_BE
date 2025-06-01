@@ -155,16 +155,16 @@ const getProvince = (fullAddresses) => {
 
 const createListAddress = (fullAddresses, userAddress = "") => {
     const normalizedUserAddress = normalizeVietnamese(userAddress);
-    console.log("✅ normalizedUserAddress:", normalizedUserAddress);
+    // console.log("✅ normalizedUserAddress:", normalizedUserAddress);
 
     // Xác định tỉnh người dùng từ fullAddresses
     const userProvince = getProvince(userAddress)
 
-    console.log("📍 User Province detected:", userProvince);
+    // console.log("📍 User Province detected:", userProvince);
 
     // Gán trọng số địa lý (gần = nhỏ)
     const geoWeights = assignWeightsFrom(userProvince, provinceAdjacency);
-    console.log("📦 Geo Distance Weights:", geoWeights);
+    // console.log("📦 Geo Distance Weights:", geoWeights);
 
     const matchedRepresentatives = provincesWithWeight
         .filter(rep =>
@@ -180,14 +180,14 @@ const createListAddress = (fullAddresses, userAddress = "") => {
             };
         });
 
-    console.log("📋 Matched Representatives with Geo Weights:");
-    console.table(matchedRepresentatives);
+    // console.log("📋 Matched Representatives with Geo Weights:");
+    // console.table(matchedRepresentatives);
 
     const sorted = matchedRepresentatives
         .sort((a, b) => a.geoWeight - b.geoWeight)
         .map(rep => rep.name);
 
-    console.log("✅ Sorted Representative Addresses (by proximity):", sorted);
+    // console.log("✅ Sorted Representative Addresses (by proximity):", sorted);
 
     return sorted;
 

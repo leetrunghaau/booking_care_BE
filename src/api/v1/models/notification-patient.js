@@ -3,19 +3,28 @@ const db = require('../../config/Database');
 const Patient = require('./patient');
 
 const NotificationPatient = db.define('notificationPatient', {
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
 
   patientId: {
     type: DataTypes.INTEGER,
     field: 'patient_id',
-    references: { model: Patient, key: 'id' },
     allowNull: false,
+    references: {
+      model: Patient,
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
 
   type: {
     type: DataTypes.ENUM('general', 'appointment', 'reminder', 'promotion'),
-    defaultValue: 'general',
     allowNull: false,
+    defaultValue: 'general',
     comment: 'Loại thông báo',
   },
 
@@ -33,6 +42,8 @@ const NotificationPatient = db.define('notificationPatient', {
 
   isRead: {
     type: DataTypes.BOOLEAN,
+    field: 'isRead',
+    allowNull: true,
     defaultValue: false,
     comment: 'Trạng thái đã đọc hay chưa',
   },
@@ -40,14 +51,18 @@ const NotificationPatient = db.define('notificationPatient', {
   createdAt: {
     type: DataTypes.DATE,
     field: 'created_at',
-    defaultValue: DataTypes.NOW,
-  }
-
+    allowNull: true,
+  },
 }, {
   tableName: 'notification_patient',
   timestamps: false,
 });
 
-NotificationPatient.belongsTo(Patient, { foreignKey: 'patientId' , onDelete: 'CASCADE', onUpdate: 'CASCADE'});
+// Quan hệ
+NotificationPatient.belongsTo(Patient, {
+  foreignKey: 'patientId',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 module.exports = NotificationPatient;

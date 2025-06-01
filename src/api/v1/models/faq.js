@@ -3,41 +3,65 @@ const db = require('../../config/Database');
 const Patient = require('./patient');
 const Doctor = require('./doctor');
 
-const FaQ = db.define('faq', {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+const Faq = db.define('faq', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
 
-    patientId: {
-        type: DataTypes.INTEGER,
-        field: 'patient_id',
-        references: { model: Patient, key: 'id' },
-        allowNull: false,
+  patientId: {
+    type: DataTypes.INTEGER,
+    field: 'patient_id',
+    allowNull: true,
+    references: {
+      model: Patient,
+      key: 'id',
     },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
 
-    doctorId: {
-        type: DataTypes.INTEGER,
-        field: 'doctor_id',
-        references: { model: Doctor, key: 'id' },
-        allowNull: false,
+  doctorId: {
+    type: DataTypes.INTEGER,
+    field: 'doctor_id',
+    allowNull: true,
+    references: {
+      model: Doctor,
+      key: 'id',
     },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
 
-    question: DataTypes.TEXT,
-    answer: DataTypes.TEXT,
-    reading: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        field: 'created_at',
-        defaultValue: DataTypes.NOW,
-    }
+  question: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+
+  answer: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+
+  reading: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+
+  createdAt: {
+    type: DataTypes.DATE,
+    field: 'created_at',
+    allowNull: true,
+  },
+
 }, {
-    tableName: 'faq',
-    timestamps: false,
+  tableName: 'faq',
+  timestamps: false,
 });
 
-// Quan hệ
-FaQ.belongsTo(FaQ, { foreignKey: 'patientId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-FaQ.belongsTo(FaQ, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Faq.belongsTo(Doctor, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Faq.belongsTo(Patient, { foreignKey: 'patientId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-module.exports = FaQ;
+
+module.exports = Faq;

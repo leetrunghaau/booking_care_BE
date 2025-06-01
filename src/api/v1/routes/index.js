@@ -21,9 +21,13 @@ const AdminSpecialties = require("./admin-specialty");
 const AdminUsers = require("./admin-user");
 const booking = require('./booking')
 const sig = require('./sig')
+const test = require('./test')
 
 // router.use(f);
 // Define routes
+router.use(test);
+
+
 router.use(hospital);
 router.use(doctorSite);
 router.use(specialties);

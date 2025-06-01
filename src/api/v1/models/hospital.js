@@ -1,25 +1,63 @@
 const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 
-const Hospital = db.define("hospital", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  slug: { type: DataTypes.STRING(255), comment: "name + id (6 chữ số)" },
-  name: DataTypes.STRING(255),
-  title: DataTypes.STRING(255),
-  about: { type: DataTypes.TEXT, comment: "Giới thiệu về bệnh viện" },
-  address: DataTypes.STRING(255),
-  phone: DataTypes.STRING(16),
-  license: DataTypes.STRING(128),
-  thumbnail: DataTypes.STRING(255),
-  img: { type: DataTypes.JSON, comment: "string[]" },
-  service: { type: DataTypes.JSON, comment: "string[]" },
-  time: {
-    type: DataTypes.JSON,
-    comment: "Array<{ weekend: 0-6, timeStart: phút, timeEnd: phút }>"
-  }
+const Hospital = db.define('hospital', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+
+  slug: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'name + id (6 chữ số)',
+  },
+
+  name: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+
+  title: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+
+  about: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Giới thiệu về bệnh viện',
+  },
+
+  address: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+
+  phone: {
+    type: DataTypes.STRING(16),
+    allowNull: true,
+  },
+
+  license: {
+    type: DataTypes.STRING(128),
+    allowNull: true,
+  },
+  mapEmbedUrl: {
+    type: DataTypes.TEXT,
+    field: "map_embed_url"
+  },
+  years:
+    { type: DataTypes.INTEGER },
+  thumbnail: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
+
 }, {
-  tableName: "hospital",
-  timestamps: false
+  tableName: 'hospital',
+  timestamps: false,
 });
 
 module.exports = Hospital;

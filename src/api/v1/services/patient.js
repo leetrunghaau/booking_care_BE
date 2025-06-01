@@ -1,11 +1,12 @@
 const Patient = require("../models/patient");
+const User = require("../models/user");
 
 class PatientSV {
     static async all() {
         return await  Patient.findAll();
     }
     static async oneId(id) {
-        return await  Patient.findByPk(id);
+        return await  Patient.findByPk(id, {include: [{model: User}]});
     }
      static async oneUId(id) {
         return await  Patient.findOne({where: {userId: id}});

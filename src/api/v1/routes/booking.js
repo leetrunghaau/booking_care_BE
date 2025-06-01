@@ -6,11 +6,12 @@ const router = express.Router();
 // Define routes
 router.get("/booking/symptoms", Booking.symptoms)
 router.get("/booking/specialties", Booking.specialties)
-// router.get("/booking/hospitals", Booking.hospitals)
 router.get("/booking/addresses", Booking.addresses)
 router.get("/booking/doctors", Booking.doctors)
 router.get("/booking/doctor/:id", Booking.doctor)
 router.get("/booking/doctor/:id/schedule/:date", Booking.doctorSchedule)
+router.get("/booking/info", Booking.info)
+router.post("/booking/up", Booking.up)
 
 
 

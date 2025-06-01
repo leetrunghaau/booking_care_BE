@@ -1,5 +1,9 @@
 const createError = require("http-errors");
 const { resOk } = require("../helpers/utils");
+const BookingSV = require("../services/Booking");
+const DoctorSV = require("../services/doctor");
+const { DATEONLY } = require("sequelize");
+const PatientSV = require("../services/patient");
 
 class DoctorAppointment {
   static async getAllAppointments(req, res, next) {
@@ -111,34 +115,39 @@ class DoctorAppointment {
   static async getAppointmentById(req, res, next) {
     try {
       const { id } = req.params;
-      const rs = {
-        id: "1",
-        patientName: "Nguyễn Văn A",
-        patientAvatar: "/placeholder.svg?height=80&width=80",
-        patientAge: 45,
-        patientGender: "Nam",
-        patientPhone: "0987654321",
-        patientEmail: "nguyenvana@example.com",
-        patientAddress: "123 Đường Lê Lợi, Quận 1, TP.HCM",
-        date: new Date().toISOString(),
-        time: "09:00",
-        duration: 30,
-        price: 300000,
-        status: "confirmed",
-        symptoms:
-          "Đau đầu, sốt nhẹ, mệt mỏi kéo dài 2 ngày. Bệnh nhân cho biết có tiếp xúc với người bị cúm trong tuần trước.",
-        medicalHistory: [
-          {
-            date: "15/03/2023",
-            diagnosis: "Viêm họng",
-            doctor: "BS. Trần Văn B",
-          },
-          {
-            date: "10/12/2022",
-            diagnosis: "Đau lưng",
-            doctor: "BS. Lê Thị C",
-          },
-        ],
+
+
+      const booking = await BookingSV.oneById(Number(id))
+      if (!booking) return resOk(res, null, "không có bệnh nhân")
+      const patient = await PatientSV.oneId(booking.patientId)
+      const doctor = await DoctorSV.one(booking.doctorId)
+      const bookingHistoryDB = await BookingSV.historyPatient(patient.id)
+      const bookingHistory = bookingHistoryDB.map(item => {
+        return {
+          date: item.bookingDate,
+          diagnosis: item.reason,
+          doctor: item.doctor?.hospital?.address ?? "Không có thông tin",
+        }
+      })
+
+      let rss = {
+        id: patient.id,
+        patientName: patient.name,
+        patientAvatar: patient.img,
+        patientAge: new Date().getFullYear() - new Date(patient.dob).getFullYear(),
+        patientGender: patient.gender,
+        patientPhone: patient.phone,
+        patientEmail: patient.user?.email ?? "Không có thông tin",
+        patientAddress: patient.address,
+
+        duration: booking.duration,
+        price: booking.price,
+        status: booking.status,
+        symptoms: booking.reason,
+        address: doctor.hospital?.address ?? (doctor.address ?? "Không có thông tin"),
+        date: booking.bookingDate,
+        time: booking.bookingTime,
+        medicalHistory: bookingHistory,
         vitalSigns: {
           bloodPressure: "120/80 mmHg",
           heartRate: "75 bpm",
@@ -147,13 +156,38 @@ class DoctorAppointment {
           weight: "68 kg",
           height: "170 cm",
         },
-        address: "Phòng khám số 3, Tầng 2, Tòa nhà Y",
-      };
+      }
+      resOk(res, rss);
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+  static async byDay(req, res, next) {
+    try {
+      const toDay = new Date().toISOString().split('T')[0];
+      const doctor = await DoctorSV.onByUId(req.user.id);
+      const rs = await BookingSV.allByDoctorADay(doctor.id, toDay);
       resOk(res, rs);
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());
     }
   }
+
+  static async upfile(req, res, next) {
+    try {
+      if (!req.customFile) resOk(res, null, "Không có file được tải lên")
+      const fileData = req.customFile;
+
+      
+
+      resOk(res, fileData);
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+
 }
 module.exports = DoctorAppointment;

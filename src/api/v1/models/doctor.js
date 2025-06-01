@@ -4,95 +4,124 @@ const Hospital = require('./hospital');
 const Specialty = require('./specialty');
 const User = require('./user');
 
-const Doctor = db.define("doctor", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  userId: {
+const Doctor = db.define('doctor', {
+  id: {
     type: DataTypes.INTEGER,
-    field: 'user_id',
-    references: {
-      model: User,
-      key: 'id',
-    }
+    autoIncrement: true,
+    primaryKey: true
   },
 
   slug: {
     type: DataTypes.STRING(255),
-    comment: "name + id (6 dg)"
+    allowNull: true,
+    comment: 'name + id (6 digits)'
   },
 
-  name: { type: DataTypes.STRING(20) },
-  phone: DataTypes.STRING(16),
-  email: DataTypes.STRING(50),
-  dob: { type: DataTypes.DATEONLY },
-  gender: DataTypes.ENUM('male', 'female', 'other'),
+  name: {
+    type: DataTypes.STRING(20),
+    allowNull: true
+  },
+
+  phone: {
+    type: DataTypes.STRING(16),
+    allowNull: true
+  },
+
+  email: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+
+  dob: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+
+  gender: {
+    type: DataTypes.ENUM('male', 'female', 'other'),
+    allowNull: true
+  },
 
   hospitalId: {
     type: DataTypes.INTEGER,
-    field: "hospital_id",
-    references: { model: Hospital, key: "id" }
-  },
-  specialtyId: {
-    type: DataTypes.INTEGER,
-    field: "specialty_id",
-    references: { model: Specialty, key: "id" }
+    field: 'hospital_id',
+    allowNull: true,
+    references: {
+      model: Hospital,
+      key: 'id'
+    }
   },
 
-  createdAt: { type: DataTypes.DATE, field: 'created_at' },
-  verified: DataTypes.DATE,
-  price: DataTypes.DOUBLE,
-  duration: {
+  specialtyId: {
     type: DataTypes.INTEGER,
-    field: "duration",
+    field: 'specialty_id',
+    allowNull: true,
+    references: {
+      model: Specialty,
+      key: 'id'
+    }
   },
+
   rating: {
     type: DataTypes.DOUBLE,
-    comment: "đánh giá trung bình"
+    allowNull: true,
+    comment: 'Đánh giá trung bình'
   },
+
   reviews: {
     type: DataTypes.INTEGER,
-    comment: "tổng số lượt đánh giá"
+    allowNull: true,
+    comment: 'Tổng số lượt đánh giá'
   },
-  img: DataTypes.TEXT,
+
+  img: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+
   about: {
     type: DataTypes.TEXT,
-    comment: "mô tả về bác sĩ"
+    allowNull: true,
+    comment: 'Mô tả về bác sĩ'
   },
+
+  userId: {
+    type: DataTypes.INTEGER,
+    field: 'user_id',
+    allowNull: true,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+
   address: {
     type: DataTypes.TEXT,
-    comment: "địa chỉ của bác sĩ"
-  },
-  education: {
-    type: DataTypes.JSON,
-    comment: `{degree: string, school: string, year: number}[]`
-  },
-  technique: {
-    type: DataTypes.JSON,
-    comment: "string[]"
-  },
-  awards: {
-    type: DataTypes.JSON,
-    comment: `{title:string, year: number}[]`
-  },
-  analysis: {
-    type: DataTypes.JSON,
-    comment: `{ title: string, journal: string, year: number }[]`
-  },
-  experience: {
-    type: DataTypes.JSON,
-    comment: `{position: string, hospital: string, period: string}[]`
-  },
-  language: {
-    type: DataTypes.JSON,
-    comment: "string[]"
+    allowNull: true
   }
 
 }, {
-  tableName: "doctor",
+  tableName: 'doctor',
   timestamps: false
 });
 
-Doctor.belongsTo(Hospital, { foreignKey: "hospitalId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-Doctor.belongsTo(Specialty, { foreignKey: "specialtyId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-Doctor.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE', onUpdate: 'CASCADE', });
+// Associations
+Doctor.belongsTo(Hospital, {
+  foreignKey: 'hospitalId',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+
+Doctor.belongsTo(Specialty, {
+  foreignKey: 'specialtyId',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+
+Doctor.belongsTo(User, {
+  foreignKey: 'userId',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
 
 module.exports = Doctor;

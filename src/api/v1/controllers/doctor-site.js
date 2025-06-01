@@ -9,6 +9,17 @@ const generateTimeSlots = require('../helpers/time');
 const SpecialtiesSV = require('../services/specialties');
 const HospitalSV = require('../services/hospital');
 const { createListAddress } = require('../helpers/addresss');
+const DoctorTechniquesSV = require('../services/doctor-techniques');
+const DoctorExperienceSV = require('../services/doctor-experiences');
+const DoctorEducationSV = require('../services/doctor-educations');
+const DoctorLanguageSV = require('../services/doctor-languages');
+const DoctorAnalysisSV = require('../services/doctor-analyses');
+const { formatPhoneNumber } = require('../helpers/num');
+const UserSV = require('../services/user');
+const PatientSV = require('../services/patient');
+const MedicalRecordSV = require('../services/medical-record');
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../../config/jwt-config');
 class DoctorSite {
     static async addresses(req, res, next) {
         try {
@@ -47,10 +58,50 @@ class DoctorSite {
     }
     static async oneBySlug(req, res, next) {
         try {
-            const rs = await DoctorSV.oneBySlug(req.params.slug)
-            console.log("slug", req.params.slug)
-            console.log("slug", rs)
-            resOk(res, rs);
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) return resOk(res, null)
+
+            const spcialty = doctor.spcialtyId ? await SpecialtiesSV.one(doctor.spcialtyId) : "Bác sĩ đa khoa"
+            const hospital = await SpecialtiesSV.one(doctor.spcialtyId)
+            const technique = (await DoctorTechniquesSV.doctor(doctor.id)).map(i => { return { id: i.id, name: i.techniqueName } })
+            const experience = (await DoctorExperienceSV.doctor(doctor.id)).map(i => {
+                return {
+                    id: i.id,
+                    period: (!i.startYear && !i.endYear) ? "Không có thông tin" : `${i.startYear ?? ""} - ${i.endYear ?? ""}`,
+                    position: i.position,
+                    hospital: i.organization,
+
+                }
+            })
+            const education = await DoctorEducationSV.doctor(doctor.id)
+            const language = (await DoctorLanguageSV.doctor(doctor.id)).map(i => i.language)
+            const analyse = (await DoctorAnalysisSV.doctor(doctor.id)).map(i => {
+                return {
+                    id: i.id,
+                    title: i.title,
+                    journal: i.journal,
+                    year: i.publishedAt
+                }
+            })
+
+            resOk(res, {
+                id: doctor.id,
+                img: doctor.img,
+                slug: doctor.slug,
+                name: doctor.name,
+                about: doctor.about,
+                rating: doctor.rating,
+                reviews: doctor.reviews,
+                specialty: spcialty,
+                address: hospital?.address ?? (doctor.address ?? "Không có thông tin"),
+                phone: doctor.phone ? formatPhoneNumber(doctor.phone) : "không có thông tin",
+                technique: technique,
+                experience: experience,
+                education: education,
+                language: language,
+                analysis: analyse,
+
+            });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -88,6 +139,70 @@ class DoctorSite {
                 sumRating: ratings.length,
             };
             resOk(res, rs);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+    static async potsRating(req, res, next) {
+        try {
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) {
+                resOk(res, null)
+            }
+            const patient = await PatientSV.oneUId(req.user.id)
+            const st = await RatingSV.up({
+                doctorId: doctor.id,
+                patientId: patient.id,
+                rating: String(req.body.rating),
+                value: req.body.comment,
+
+            })
+
+            const ratings = await RatingSV.allDId(doctor.id);
+
+            let sumRating = 0;
+            const starCounts = [0, 0, 0, 0, 0];
+
+            ratings.forEach(item => {
+                const star = Number(item.rating);
+                if (star >= 1 && star <= 5) {
+                    starCounts[star - 1] += 1;
+                    sumRating += star;
+                }
+            });
+
+            const ratingDistribution = starCounts.map((count, i) => {
+                return {
+                    stars: i + 1,
+                    percentage: ratings.length > 0 ? (count / ratings.length * 100).toFixed(0) : 0
+                };
+            }).sort((a, b) => b.stars - a.stars)
+
+            const rs = {
+                ratingDistribution,
+                avgRating: ratings.length > 0 ? (sumRating / ratings.length).toFixed(1) : 0,
+                sumRating: ratings.length,
+            };
+
+            await DoctorSV.edit(doctor.id, {
+                rating: rs.avgRating,
+                reviews: rs.sumRating
+
+            })
+
+
+
+            const max = await RatingSV.countDId(doctor.id)
+            const ratings2 = await RatingSV.allDIdvsL(doctor.id, req.body.index);
+            resOk(res, {
+                ratingDistribution: rs,
+                ratings: {
+                    max: max,
+                    rvs: ratings2
+                }
+            });
+
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -255,28 +370,6 @@ class DoctorSite {
             return next(createError.InternalServerError());
         }
     }
-    static async doctorFaqs(req, res, next) {
-        try {
-            const rs = [
-                {
-                    question: "Làm sao để đặt lịch hẹn với bác sĩ?",
-                    answer: "Bạn có thể nhấn vào nút 'Đặt câu hỏi' và điền thông tin cần thiết.",
-                },
-                {
-                    question: "Bác sĩ có làm việc cuối tuần không?",
-                    answer: "Một số bác sĩ có làm việc vào cuối tuần. Vui lòng kiểm tra lịch cụ thể.",
-                },
-                {
-                    question: "Tôi có thể hủy lịch hẹn không?",
-                    answer: "Bạn có thể hủy lịch hẹn trước 24 giờ mà không bị mất phí.",
-                },
-            ]
-            resOk(res, rs);
-        } catch (error) {
-            console.log(error);
-            return next(createError.InternalServerError());
-        }
-    }
 
     static async doctorHospital(req, res, next) {
         try {
@@ -301,10 +394,40 @@ class DoctorSite {
             return next(createError.InternalServerError());
         }
     }
+    static async canRating(req, res, next) {
+        try {
+            // không có hearder    
+            if (!req.headers['authorization']) return resOk(res, false)
+            const authHeader = req.headers['authorization'];
+            const bearerToken = authHeader.split(' ');
+            const token = bearerToken[1];
+            // token không đuunsg định dạng
+            if (bearerToken[0] != 'Bearer') return resOk(res, false)
+            const payload = jwt.verify(token, jwtConfig.sortKey);
+            const user = await UserSV.oneId(payload.userId);
+            //user không có trong hệ thống
+            if (!user) resOk(res, false)
+            //user không đúng role
+            if (user.role != "patient") return resOk(res, false)
+
+            const patient = await PatientSV.oneUId(user.id)
+            if (!patient) return resOk(res, false)
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) resOk(res, false)
+            const booking = await BookingSV.haveBooking(doctor.id, patient.id)
+            const record = await MedicalRecordSV.havePD(doctor.id, patient.id)
+            if ((booking.length == 0) && (record.length == 0)) return resOk(res, false);
+
+            resOk(res, true);
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
 
     static async doctorSchedule(req, res, next) {
         try {
-           
+
 
             const doctor = await DoctorSV.oneBySlug(req.params.slug)
             if (!doctor) {
@@ -351,6 +474,7 @@ class DoctorSite {
             return next(createError.InternalServerError());
         }
     }
+
 
 }
 module.exports = DoctorSite;

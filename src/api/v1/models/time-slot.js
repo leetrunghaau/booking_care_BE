@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 const db = require('../../config/Database');
 const Doctor = require('./doctor');
 
@@ -6,34 +6,24 @@ const TimeSlot = db.define('timeSlot', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
-
   doctorId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: "doctor_id",
-    references: {
-      model: Doctor,
-      key: "id"
-    },
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE"
+    field: 'doctor_id',  // map cột DB
   },
-
   date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
-    comment: "Ngày làm việc của bác sĩ"
+    comment: 'Ngày làm việc của bác sĩ',
   },
-
   duration: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 15, // phút
-    comment: "Thời gian mỗi khung (phút)"
+    defaultValue: 15,
+    comment: 'Thời gian mỗi khung (phút)',
   },
-
   time: {
     type: DataTypes.JSON,
     allowNull: false,
@@ -43,15 +33,13 @@ const TimeSlot = db.define('timeSlot', {
       status: "booked" | "available" | "locked", // Trạng thái khung giờ
       bookingId: number,         // ID từ bảng booking (không có ràng buộc)
       name: string               // Tên bệnh nhân (truy vấn nhanh)
-    }]`
-  }
-
+    }]`,
+  },
 }, {
   tableName: 'time_slots',
-  timestamps: false
+  timestamps: false,
 });
 
-// Thiết lập liên kết với bảng Doctor
-TimeSlot.belongsTo(Doctor, { foreignKey: "doctorId", onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+TimeSlot.belongsTo(Doctor, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 module.exports = TimeSlot;

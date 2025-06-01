@@ -25,11 +25,6 @@ const Specialty = db.define("specialty", {
     },
 
 
-    commonDiseases: {
-        type: DataTypes.JSON,
-        field: "common_diseases",
-        comment: "bệnh phổ biến: { name: string; img: string }[]"
-    },
     advantages: {
         type: DataTypes.JSON,
         comment: "string[]"

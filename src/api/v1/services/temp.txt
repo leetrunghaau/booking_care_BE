@@ -1,6 +1,7 @@
 
 class SV {
     static async all() {
+       
         return await .findAll()
     }
 
@@ -11,11 +12,16 @@ class SV {
     static async up(data) {
         return await .create(data)
     }
+    static async edit(id, data) {
+        return await .update(data, {where: {id:id}})
+    }
 
     static async down(id) {
-        return await .destroy({where: {id: id}})
+        return await .destroy({ where: { id: id } })
     }
 
 }
 
 module.exports = SV;
+
+

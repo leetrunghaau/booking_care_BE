@@ -5,7 +5,7 @@ class PatientSV {
     static async all() {
         return await  Patient.findAll();
     }
-    static async oneId(id) {
+    static async one(id) {
         return await  Patient.findByPk(id, {include: [{model: User}]});
     }
      static async oneUId(id) {

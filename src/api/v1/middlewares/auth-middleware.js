@@ -33,7 +33,7 @@ const authorization = permission => {
             const payload = jwt.verify(token, jwtConfig.sortKey);
             console.log(payload);
 
-            const user = await UserSV.oneId(payload.userId);
+            const user = await UserSV.one(payload.userId);
             
             console.log(user.role);
             console.log(permission);

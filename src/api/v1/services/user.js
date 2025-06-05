@@ -5,7 +5,7 @@ class UserSV {
         return  await User.findAll();
     }
 
-    static async oneId(id) {
+    static async one(id) {
         return  await User.findByPk(id);
     }
     static async oneEmail(email) {

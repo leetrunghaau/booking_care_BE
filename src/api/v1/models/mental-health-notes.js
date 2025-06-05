@@ -21,17 +21,17 @@ const MentalHealthNote = db.define('mentalHealthNote', {
     onUpdate: 'CASCADE',
   },
 
-  assessment: {
+  assessment: {   // ghi chú đánh giá ban đầu
     type: DataTypes.TEXT,
     allowNull: true,
   },
 
-  diagnosis: {
+  diagnosis: {    // chẩn đoán
     type: DataTypes.TEXT,
     allowNull: true,
   },
 
-  therapyPlan: {
+  therapyPlan: {  // kế hoạch điều trị
     type: DataTypes.TEXT,
     field: 'therapy_plan',
     allowNull: true,

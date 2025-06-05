@@ -10,12 +10,22 @@ class BookingSV {
         return await Booking.findAll();
     }
     static async allByDay(date) {
-        return await Booking.findAll({ where: { bookingDate: date } });
+        return await Booking.findAll({ where: { day: date } });
     }
+    static async countDoctor(id, status = null) {
+        const query = {}
+        query.doctorId = id
+        if (status) {
+            query.status = status
+        }
+        return await Booking.count(query);
+    }
+
+
     static async allByDoctorADay(id, date) {
         return await Booking.findAll({
             where: {
-                bookingDate: date,
+                day: date,
                 doctorId: id
             },
             include: [
@@ -30,8 +40,72 @@ class BookingSV {
             ]
         });
     }
-    static async oneById(id) {
-        return await Booking.findByPk(id);
+
+    static async allByPatinetADay(id, date) {
+        return await Booking.findAll({
+            where: {
+                day: date,
+                patientId: id
+            },
+            include: [
+                {
+                    model: Patient,
+                    include: [{ model: User }]
+                },
+                {
+                    model: Doctor,
+                    include: [{ model: User }, { model: Hospital }]
+                }
+            ]
+        });
+    }
+
+    static async allByDoctorFromTo(id, startTime = null, endTime = null) {
+        const whereClause = {
+            doctorId: id
+        };
+
+        // Thêm điều kiện theo thời gian nếu có
+        if (startTime && endTime) {
+            whereClause.day = {
+                [Op.between]: [startTime, endTime]
+            };
+        } else if (startTime) {
+            whereClause.day = {
+                [Op.gte]: startTime
+            };
+        } else if (endTime) {
+            whereClause.day = {
+                [Op.lte]: endTime
+            };
+        }
+
+        return await Booking.findAll({
+            where: whereClause,
+            include: [
+                {
+                    model: Patient,
+                    include: [{ model: User }]
+                },
+                {
+                    model: Doctor,
+                    include: [{ model: User }, { model: Hospital }]
+                }
+            ],
+            order: [['day', 'ASC'], ['time', 'ASC']]
+        });
+    }
+
+    static async one(id) {
+        return await Booking.findOne( {
+            where:{id: id},
+            include: [
+                {
+                    model: Doctor,
+                    include: [{ model: Hospital }]
+                }
+            ],
+        });
     }
     static async historyPatient(id) {
         const today = new Date().toISOString().split("T")[0];
@@ -40,8 +114,8 @@ class BookingSV {
             where: {
                 patientId: id,
                 status: "completed",
-                bookingDate: {
-                    [Op.lte]: today 
+                day: {
+                    [Op.lte]: today
                 }
             },
             include: [
@@ -50,7 +124,7 @@ class BookingSV {
                     include: [{ model: Hospital }]
                 }
             ],
-            order: [['bookingDate', 'DESC']] 
+            order: [['day', 'DESC']]
         });
     }
 
@@ -58,11 +132,13 @@ class BookingSV {
         return await Booking.findAll({ where: { patientId: id } })
     }
     static async haveBooking(doctorId, patientId) {
-        return await Booking.findAll({ where: { 
-            patientId: patientId,
-            doctorId: doctorId,
-            status: "completed",
-        } })
+        return await Booking.findAll({
+            where: {
+                patientId: patientId,
+                doctorId: doctorId,
+                status: "completed",
+            }
+        })
     }
     static async allByDoctor(id) {
         return await Booking.findAll({ where: { doctorId: id } })
@@ -70,8 +146,14 @@ class BookingSV {
     static async up(data) {
         return await Booking.create(data)
     }
+     static async down(id) {
+        return await Booking.destroy({where:{id: id}})
+    }
+    static async edit(id, data) {
+        return  await Booking.update(data, { where: { id: id } })
+    }
     static async allByDidADate(id, date) {
-        return await Booking.findAll({ where: { doctorId: id, bookingDate: date } });
+        return await Booking.findAll({ where: { doctorId: id, day: date } });
     }
 }
 

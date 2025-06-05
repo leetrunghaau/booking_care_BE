@@ -19,29 +19,28 @@ const Prescription = db.define('prescriptions', {
     },
     onDelete: 'CASCADE',
   },
-
-  medicineName: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-    field: 'medicine_name',
+  useStart:{
+    type: DataTypes.DATEONLY,
+    field:"use_start"
   },
+  name: DataTypes.STRING(100),
 
-  dosage: {
+  dosage: { //	Liều lượng – lượng thuốc cho mỗi lần dùng, ví dụ: “500mg”, “1 viên”.
     type: DataTypes.STRING(50),
     allowNull: true,
   },
 
-  usage: {
+  usage: { //	Cách dùng thuốc – uống/truyền/tiêm, trước hay sau ăn, thời điểm dùng trong ngày, v.v.
     type: DataTypes.TEXT,
     allowNull: true,
   },
 
-  duration: {
-    type: DataTypes.STRING(50),
+  duration: { //	Thời gian dùng thuốc, ví dụ: “5 ngày”, “1 tuần”, “2 lần/ngày trong 10 ngày”.
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
 
-  notes: {
+  notes: {    //	Ghi chú bổ sung – ví dụ: lưu ý tương tác thuốc, cảnh báo cho người bệnh, hoặc chỉ dẫn đặc biệt.
     type: DataTypes.TEXT,
     allowNull: true,
   },

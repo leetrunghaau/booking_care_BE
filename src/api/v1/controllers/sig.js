@@ -122,7 +122,7 @@ class Sig {
             const payload = jwt.verify(input.token, jwtConfig.sortKey);
             console.log("payload", payload)
             const userId = payload.userId
-            const user = await UserSV.oneId(userId)
+            const user = await UserSV.one(userId)
 
             if (!user) {
                 resOk(res, null, "Email không có trong hệ thống")

@@ -8,42 +8,48 @@ const Vitals = db.define('vitals', {
     autoIncrement: true,
     primaryKey: true,
   },
-  medical_record_id: {
+  medicalRecordId: {
     type: DataTypes.INTEGER,
+    field:"medical_record_id",
     allowNull: false,
     references: {
-          model: MedicalRecord,
-          key: 'id',
-        },
+      model: MedicalRecord,
+      key: 'id',
+    },
   },
-  temperature: {
+  temperature: { //Nhiệt độ cơ thể (°C), ví dụ: 36.7.
     type: DataTypes.DECIMAL(4, 1),
     allowNull: true,
   },
-  pulse: {
+  pulse: { //Mạch (nhịp tim), đơn vị: nhịp/phút.
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  blood_pressure: {
+  bloodPressure: {   //	Huyết áp, thường ghi ở dạng “Tâm thu/Tâm trương” (VD: "120/80").
     type: DataTypes.STRING(20),
+    field: "blood_pressure",
     allowNull: true,
   },
-  respiratory_rate: {
+  respiratoryRate: { //Nhịp thở – số lần thở/phút.
     type: DataTypes.INTEGER,
+    field: "respiratory_rate",
     allowNull: true,
   },
-  bmi: {
+  bmi: {    //	Chỉ số BMI (Body Mass Index) – chỉ số khối cơ thể.
     type: DataTypes.DECIMAL(4, 1),
     allowNull: true,
   },
-  recorded_at: {
+  weight: DataTypes.INTEGER,
+  height:DataTypes.INTEGER,
+  recordedAt: { //	Thời điểm ghi nhận dấu hiệu sinh tồn (mặc định là thời điểm tạo bản ghi).
     type: DataTypes.DATE,
+    field: "recorded_at",
     defaultValue: DataTypes.NOW,
   }
 }, {
   tableName: 'vitals',
   timestamps: false,
 });
-Vitals.belongsTo(MedicalRecord, { foreignKey: 'medical_record_id', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Vitals.belongsTo(MedicalRecord, { foreignKey: 'medicalRecordId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 module.exports = Vitals;

@@ -2,9 +2,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const BASE_UPLOAD_DIR = path.join(__dirname, '..', '..','..', '..', 'public');
+const BASE_UPLOAD_DIR = path.join(__dirname, '..', '..', '..', '..', 'public');
 
-const uploadFileWithSubPath = (fieldName = 'file', subPath = '') => {
+const uploadFileWithSubPath = (fieldName = 'files', subPath = '') => {
   const uploadPath = path.join(BASE_UPLOAD_DIR, subPath);
 
   if (!fs.existsSync(uploadPath)) {
@@ -38,24 +38,26 @@ const uploadFileWithSubPath = (fieldName = 'file', subPath = '') => {
     fileSize: 10 * 1024 * 1024 // 10MB
   };
 
-  const upload = multer({ storage, fileFilter, limits }).single(fieldName);
+  const upload = multer({ storage, fileFilter, limits }).array(fieldName);
 
   return (req, res, next) => {
     upload(req, res, function (err) {
       if (err) {
         return next(err);
       }
-      if (req.file) {
-        req.customFile = {
-          filename: req.file.filename,
-          originalname: req.file.originalname,
-          mimetype: req.file.mimetype,
-          size: req.file.size,
-          path: req.file.path,
+
+      if (req.files && req.files.length > 0) {
+        req.customFiles = req.files.map((file) => ({
+          filename: file.filename,
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: file.path,
           subPath,
-          fullPath: path.join(uploadPath, req.file.filename)
-        };
+          fullPath: path.join(uploadPath, file.filename),
+        }));
       }
+
       next();
     });
   };

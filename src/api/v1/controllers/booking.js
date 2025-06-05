@@ -7,7 +7,6 @@ const { createListAddress, getProvince } = require('../helpers/addresss');
 const { normalizeText } = require('../helpers/text');
 const ScheduleSV = require('../services/schedule');
 const BookingSV = require('../services/Booking');
-const generateTimeSlots = require('../helpers/time');
 const jwtConfig = require('../../config/jwt-config');
 const jwt = require('jsonwebtoken');
 const UserSV = require('../services/user');
@@ -19,6 +18,7 @@ const SymptomsSV = require('../services/symptom');
 const DiseaseSymptom = require('../models/disease-symptoms');
 const DiseaseSymptomsSV = require('../services/disease-symptoms');
 const DiseaseSpecialtySV = require('../services/disease-specialty');
+const { generateTimeSlots } = require('../helpers/time');
 class Booking {
     static async symptoms(req, res, next) {
         // try {
@@ -45,7 +45,7 @@ class Booking {
                 const spcialtyIds = (await SpecialtiesSV.all()).map(i => i.id)
                 const diseaseIds = (await DiseaseSpecialtySV.disease(spcialtyIds)).map(i => i.diseaseId)
                 const symptomIds = (await DiseaseSymptomsSV.symptoms(diseaseIds)).map(i => i.symptomId)
-                const symptoms =symptomIds.length != 0 ? (await SymptomsSV.all(symptomIds, 50)).map(i => i.name) : []
+                const symptoms = symptomIds.length != 0 ? (await SymptomsSV.all(symptomIds, 50)).map(i => i.name) : []
                 return resOk(res, symptoms);
             }
 
@@ -229,9 +229,8 @@ class Booking {
                 return
             }
             const bookings = await BookingSV.allByDidADate(doctor.id, req.params.date);
-
             const bookedTimes = bookings.map(i => {
-                const [h, m] = i.bookingTime.split(':').map(Number);
+                const [h, m] = i.time.split(':').map(Number);
                 return h * 60 + m + 1;
             });
 
@@ -243,8 +242,8 @@ class Booking {
                 const slotStart = hStart * 60 + mStart;
                 const slotEnd = hEnd * 60 + mEnd;
 
-                const isBooked = bookedTimes.some(bookingTime => {
-                    return (bookingTime >= slotStart && bookingTime <= slotEnd)
+                const isBooked = bookedTimes.some(time => {
+                    return (time >= slotStart && time <= slotEnd)
                 });
 
                 return {
@@ -278,13 +277,13 @@ class Booking {
             // token không đuunsg định dạng
             if (bearerToken[0] != 'Bearer') return resOk(res, null)
             const payload = jwt.verify(token, jwtConfig.sortKey);
-            const user = await UserSV.oneId(payload.userId);
+            const user = await UserSV.one(payload.userId);
             //user không có trong hệ thống
             if (!user) resOk(res, null)
             //user không đúng role
             if (user.role != "patient") return resOk(res, null)
 
-            let rs = await PatientSV.oneId(user.id)
+            let rs = await PatientSV.one(user.id)
 
             if (!rs) return resOk(res, null)
 
@@ -330,7 +329,11 @@ class Booking {
             if (!doctor) {
                 return resOk(res, null, "Không tìm thấy bác sĩ tương ứng");
             }
-
+            const schedule = await ScheduleSV.mainDId(doctor.id)
+            if (!schedule) {
+                resOk(res, null, "Đã có lỗi vui lòng nhập lại")
+                return
+            }
             const patientId = await resolvePatient(input);
             if (!patientId) {
                 return resOk(res, null, "Không thể xác định bệnh nhân");
@@ -339,10 +342,11 @@ class Booking {
             const bookingData = {
                 patientId,
                 doctorId: doctor.id,
-                bookingDate: input.date,
-                bookingTime: input.time,
-                price: doctor.price,
+                day: input.date,
+                time: input.time,
+                price: schedule.appointmentPrice,
                 reason: input.symptoms,
+                duration: schedule.appointmentDuration
             };
 
             const result = await BookingSV.up(bookingData);

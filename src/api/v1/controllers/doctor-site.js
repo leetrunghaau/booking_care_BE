@@ -404,7 +404,7 @@ class DoctorSite {
             // token không đuunsg định dạng
             if (bearerToken[0] != 'Bearer') return resOk(res, false)
             const payload = jwt.verify(token, jwtConfig.sortKey);
-            const user = await UserSV.oneId(payload.userId);
+            const user = await UserSV.one(payload.userId);
             //user không có trong hệ thống
             if (!user) resOk(res, false)
             //user không đúng role
@@ -443,7 +443,7 @@ class DoctorSite {
             const bookings = await BookingSV.allByDidADate(doctor.id, req.params.day);
 
             const bookedTimes = bookings.map(i => {
-                const [h, m] = i.bookingTime.split(':').map(Number);
+                const [h, m] = i.time.split(':').map(Number);
                 return h * 60 + m + 1;
             });
 
@@ -455,8 +455,8 @@ class DoctorSite {
                 const slotStart = hStart * 60 + mStart;
                 const slotEnd = hEnd * 60 + mEnd;
 
-                const isBooked = bookedTimes.some(bookingTime => {
-                    return (bookingTime >= slotStart && bookingTime <= slotEnd)
+                const isBooked = bookedTimes.some(time => {
+                    return (time >= slotStart && time <= slotEnd)
                 });
 
                 return {

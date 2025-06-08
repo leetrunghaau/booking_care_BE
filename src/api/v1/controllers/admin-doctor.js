@@ -4,73 +4,10 @@ const DoctorSV = require("../services/doctor");
 const HospitalSV = require("../services/hospital");
 const SpecialtiesSV = require("../services/specialties");
 const { formatPhoneNumber } = require("../helpers/num");
+const UserSV = require("../services/user");
 
 class AdminDoctors {
-  static async getAvailableDoctors(req, res, next) {
-    try {
-      const rs = [
-        {
-          id: "1",
-          name: "TS. BS. Nguyễn Văn A",
-          specialty: "Tim mạch",
-          hospital: "Bệnh viện Đa khoa Trung ương",
-          experience: "15 năm",
-          appointments: 245,
-          rating: 4.9,
-          status: "active",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "2",
-          name: "PGS. TS. Trần Thị B",
-          specialty: "Nhi khoa",
-          hospital: "Bệnh viện Nhi Trung ương",
-          experience: "12 năm",
-          appointments: 198,
-          rating: 4.8,
-          status: "active",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "3",
-          name: "BS. CKI. Lê Văn C",
-          specialty: "Da liễu",
-          hospital: "Bệnh viện Da liễu Trung ương",
-          experience: "8 năm",
-          appointments: 156,
-          rating: 4.7,
-          status: "inactive",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "4",
-          name: "BS. CKII. Phạm Thị D",
-          specialty: "Thần kinh",
-          hospital: "Bệnh viện Bạch Mai",
-          experience: "10 năm",
-          appointments: 187,
-          rating: 4.6,
-          status: "active",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "5",
-          name: "TS. BS. Hoàng Văn E",
-          specialty: "Nội tiết",
-          hospital: "Bệnh viện Việt Đức",
-          experience: "14 năm",
-          appointments: 210,
-          rating: 4.5,
-          status: "active",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-      ];
-      resOk(res, rs);
-    } catch (error) {
-      console.log(error);
-      return next(createError.InternalServerError());
-    }
-  }
+
   static async getDoctors(req, res, next) {
     try {
       let { page, hospital, specialty, search } = req.query
@@ -104,11 +41,75 @@ class AdminDoctors {
       const hospitals = await HospitalSV.all()
       const specialties = await SpecialtiesSV.all()
 
-
       resOk(res, {
         hospitals: hospitals,
         specialties: specialties,
       });
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+
+  static async upDoctor(req, res, next) {
+    try {
+      const input = req.body;
+
+      const checkMail = await UserSV.oneEmail(input.email)
+      if(checkMail) return resOk(res, {status: false, mess:"Email đã tồn tại trên hệ thống"})
+      const doctor = await DoctorSV.up({
+        name: input.name,
+        phone: input.phone,
+        email: input.email,
+        dob: input.dob,
+        gender: input.gender,
+        about: input.about,
+      });
+      if (!doctor || !doctor.id) return resOk(res, null);
+      const slugName = doctor.name?.toLowerCase().trim().replace(/\s+/g, '-');
+      const paddedId = doctor.id.toString().padStart(6, '0');
+      const slug = `${slugName}-${paddedId}`;
+      const code = `BS-${paddedId}`;
+      await DoctorSV.edit(doctor.id, {
+        slug: slug,
+        code: code,
+      });
+      resOk(res, {status: true, doctor:"Email đã tồn tại trên hệ thống"});
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+
+  static async upAvata(req, res, next) {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return resOk(res, false);
+      const doctor = await DoctorSV.one(id)
+      if (!doctor) return resOk(res, null)
+      const tem = await DoctorSV.edit(doctor.id, { img: `/${req.customFile.subPath}/${req.customFile.filename}` })
+      resOk(res, { 
+        img: `/${req.customFile.subPath}/${req.customFile.filename}`,
+        name : doctor.name
+       });
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+  static async downDoctor(req, res, next) {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return resOk(res, false);
+
+      const doctor = await DoctorSV.one(id)
+      if (!doctor) return resOk(res, true);
+
+      if (doctor.userId) {
+        await UserSV.down(doctor.userId);
+      }
+      await DoctorSV.down(id);
+      resOk(res, true);
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());

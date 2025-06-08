@@ -9,6 +9,7 @@ router.get("/doctor-site/specialties",DoctorSite.spesialties);
 router.get("/doctor-site/doctors",DoctorSite.all);
 router.get("/doctor-site/doctor/:slug",DoctorSite.oneBySlug);
 router.get("/doctor-site/doctor/:slug/rating",DoctorSite.rating);
+router.get("/doctor-site/doctor/:slug/working-days",DoctorSite.getWorkingDays);
 router.post("/doctor-site/doctor/:slug/rating",authorization(["patient"]), DoctorSite.potsRating);
 router.get("/doctor-site/doctor/:slug/can-rating",DoctorSite.canRating);
 router.get("/doctor-site/doctor/:slug/ratings/:len",DoctorSite.ratings);

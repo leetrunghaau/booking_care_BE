@@ -5,9 +5,12 @@ const { formatPhoneNumber } = require("../helpers/num");
 const PatientSV = require("../services/patient");
 const { getVNGender } = require("../helpers/text");
 const moment = require("moment");
+const UserSV = require("../services/user");
+const AccountSV = require("../services/account");
+const { hashPassword } = require("../helpers/password-crypt");
 
 class AdminPatient {
- 
+
   static async getPatinents(req, res, next) {
     try {
       let { page, search } = req.query
@@ -16,9 +19,9 @@ class AdminPatient {
       const patients = data.data.map(i => ({
         id: i.id,
         name: i.name,
-        code:i.code,
+        code: i.code,
         gender: getVNGender(i.gender),
-        dob: i.dob ? moment(i.dob).format("DD-MM-YYYY") :'-',
+        dob: i.dob ? moment(i.dob).format("DD-MM-YYYY") : '-',
         email: i.user?.email ?? i.email ?? "không có thông tin",
         img: i.img,
         phone: formatPhoneNumber(i.phone),
@@ -35,6 +38,42 @@ class AdminPatient {
       return next(createError.InternalServerError());
     }
   }
- 
+
+  static async hotRePass(req, res, next) {
+    try {
+      const id = Number(req.params.id);
+      const newPass = req.body.pass;
+      if (!id || id <= 0) {
+        return resOk(res, { status: false, mess: "ID bệnh nhân không hợp lệ" });
+      }
+      if (!newPass || typeof newPass !== 'string' || newPass.length < 6) {
+        return resOk(res, { status: false, mess: "Mật khẩu phải có ít nhất 6 ký tự" });
+      }
+      const patient = await PatientSV.one(id);
+      if (!patient || !patient.userId) {
+        return resOk(res, { status: false, mess: "Tài khoản chưa đăng ký đăng nhập" });
+      }
+      const user = await UserSV.one(patient.userId);
+      if (!user) {
+        return resOk(res, { status: false, mess: "Không tìm thấy người dùng" });
+      }
+      const acc = await AccountSV.oneByUId(user.id);
+      if (!acc) {
+        return resOk(res, { status: false, mess: "Không tìm thấy tài khoản để cập nhật mật khẩu" });
+      }
+      const passEncode = await hashPassword(newPass);
+      const newAcc = await AccountSV.edit(acc.id, { pass: passEncode });
+      if (!newAcc) {
+        return resOk(res, { status: false, mess: "Đổi mật khẩu không thành công, vui lòng thử lại" });
+      }
+      return resOk(res, { status: true, mess: "Đổi mật khẩu thành công" });
+
+    } catch (error) {
+      console.error("Lỗi hotRePass:", error);
+      return next(createError.InternalServerError());
+    }
+  }
+
+
 }
 module.exports = AdminPatient;

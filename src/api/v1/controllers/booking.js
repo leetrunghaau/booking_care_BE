@@ -19,6 +19,7 @@ const DiseaseSymptom = require('../models/disease-symptoms');
 const DiseaseSymptomsSV = require('../services/disease-symptoms');
 const DiseaseSpecialtySV = require('../services/disease-specialty');
 const { generateTimeSlots } = require('../helpers/time');
+const { getActiveDays } = require('../helpers/dayly');
 class Booking {
     static async symptoms(req, res, next) {
         // try {
@@ -211,13 +212,32 @@ class Booking {
             resOk(res, {
                 id: doctor.id,
                 name: doctor.name,
+                img: doctor.img,
                 title: "",
-                specialtyName:doctor.specialty?.name ?? "Đa khoa",
-                specialtyIcon:doctor.specialty?.icon ?? "",
+                specialtyName: doctor.specialty?.name ?? "Đa khoa",
+                specialtyIcon: doctor.specialty?.icon ?? "",
                 price: schedule?.appointmentPrice ?? 0,
                 address: doctor.hospital?.address ?? (doctor.address ?? "Không có thông tin")
 
             });
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async getWorkingDays(req, res, next) {
+        try {
+            const error = req.params.id ?? null
+            if ((!error) || error == "null" || error == "NaN") {
+                resOk(res, [])
+                return
+            }
+            const doctor = await DoctorSV.one(Number(req.params.id))
+            if (!doctor) return resOk(res, []);
+            const rs = await ScheduleSV.mainDId(doctor.id);
+            if (!rs) return resOk(res, []);
+            resOk(res, getActiveDays(rs.workingDays));
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -349,9 +369,9 @@ class Booking {
                 doctorId: doctor.id,
                 day: input.date,
                 time: input.time,
-                price: schedule.appointmentPrice,
+                price: schedule.appointmentPrice ?? 0,
                 reason: input.symptoms,
-                duration: schedule.appointmentDuration
+                duration: schedule.appointmentDuration ?? 0
             };
 
             const result = await BookingSV.up(bookingData);

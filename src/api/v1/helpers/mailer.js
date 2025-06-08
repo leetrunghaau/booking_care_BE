@@ -162,6 +162,78 @@ const sendVerifyEmail = (to, token) => {
   });
 };
 
+const sendAppointmentEmail = (to, appointmentDetails) => {
+  const {
+    patientName,
+    doctorName,
+    time,
+    date,
+    location,
+    supportPhone,
+    supportEmail,
+  } = appointmentDetails;
+
+  const content = () => {
+    return `
+      <div style="font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f4f4; padding: 40px 0;">
+        <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- LOGO -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 2v2"/>
+                <path d="M5 2v2"/>
+                <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/>
+                <path d="M8 15a6 6 0 0 0 12 0v-3"/>
+                <circle cx="20" cy="10" r="2"/>
+              </svg>
+              <h2 style="color: #0d9488; margin: 0;">BookingCare</h2>
+            </div>
+          </div>
+
+          <!-- MAIN CONTENT -->
+          <h3 style="color: #333; margin-bottom: 20px;">Xác nhận lịch hẹn khám</h3>
+          <p style="font-size: 16px; color: #333;">Xin chào <strong>${patientName}</strong>,</p>
+          <p style="font-size: 16px; color: #333;">
+            Lịch hẹn khám của bạn đã được đặt thành công. Dưới đây là thông tin chi tiết:
+          </p>
+
+          <ul style="font-size: 16px; color: #333; line-height: 1.6;">
+            <li><strong>Bác sĩ:</strong> ${doctorName}</li>
+            <li><strong>Ngày:</strong> ${date}</li>
+            <li><strong>Thời gian:</strong> ${time}</li>
+            <li><strong>Địa điểm:</strong> ${location}</li>
+          </ul>
+
+          <p style="font-size: 14px; color: #666; margin-top: 20px;">
+            Vui lòng có mặt trước giờ hẹn ít nhất 15 phút. Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ, xin vui lòng liên hệ:
+          </p>
+          <p style="font-size: 14px; color: #333;">
+            📞 SĐT: ${supportPhone} <br />
+            ✉️ Email: <a href="mailto:${supportEmail}" style="color: #0d9488;">${supportEmail}</a>
+          </p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+          <p style="font-size: 12px; color: #aaa; text-align: center;">
+            © 2025 BookingCare. Đây là email tự động, vui lòng không phản hồi.
+          </p>
+        </div>
+      </div>
+    `;
+  };
+
+  const transport = createTransport();
+  const mailSender = sendMail(transport);
+
+  return mailSender({
+    to,
+    subject: 'Xác nhận lịch hẹn khám - BookingCare',
+    html: content()
+  });
+};
+
 
 module.exports = {
     sendResetPasswordEmail,

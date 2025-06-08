@@ -21,8 +21,8 @@ class HospitalSpecialtySV {
         return await HospitalSpecialty.create(data)
     }
 
-    static async down(id) {
-        return await HospitalSpecialty.destroy({ where: { id: id } })
+    static async down(hospitalId, specialtyId) {
+        return await HospitalSpecialty.destroy({ where: { hospitalId: hospitalId, specialtyId: specialtyId } })
     }
 
 }

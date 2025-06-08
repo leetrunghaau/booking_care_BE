@@ -10,11 +10,16 @@ class HospitalServiceSV {
     }
 
     static async one(id) {
+        await HospitalService.findOrCreate
         return await HospitalService.findByPk(id)
     }
 
     static async up(data) {
         return await HospitalService.create(data)
+    }
+
+    static async edit(id, data) {
+        return await HospitalService.update(data, { where: { id: id } });
     }
 
     static async down(id) {

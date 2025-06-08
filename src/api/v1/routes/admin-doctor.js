@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const AdminDoctors = require("../controllers/admin-doctor");
+const { authorization } = require("../middlewares/auth-middleware");
+const { uploadSingleFileWithSubPath } = require("../middlewares/upload-middleware");
 
 // Define routes
 
-router.get("/admin-doctor/available", AdminDoctors.getAvailableDoctors);
-router.get("/admin-doctor/doctors", AdminDoctors.getDoctors);
-router.get("/admin-doctor/base", AdminDoctors.getBase);
+router.get("/admin-doctor/doctors", authorization(["admin"]), AdminDoctors.getDoctors);
+router.get("/admin-doctor/base", authorization(["admin"]), AdminDoctors.getBase);
+router.delete("/admin-doctor/doctors/:id", authorization(["admin"]), AdminDoctors.downDoctor);
+router.post("/admin-doctor/doctor", authorization(["admin"]), AdminDoctors.upDoctor);
+router.post("/admin-doctor/doctor/:id/avatar",  authorization(["admin"]), uploadSingleFileWithSubPath("file", "doctor"), AdminDoctors.upAvata);
 
 module.exports = router;

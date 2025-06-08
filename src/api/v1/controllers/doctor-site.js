@@ -22,6 +22,7 @@ const jwtConfig = require('../../config/jwt-config');
 const { generateTimeSlots, getReadableTimeRanges } = require('../helpers/time');
 const { pickFirstValid } = require('../helpers/obj');
 const HospitalTimeSV = require('../services/hospital-times');
+const { getActiveDays } = require('../helpers/dayly');
 class DoctorSite {
     static async addresses(req, res, next) {
         try {
@@ -104,6 +105,21 @@ class DoctorSite {
                 analysis: analyse,
 
             });
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
+
+    static async getWorkingDays(req, res, next) {
+        try {
+            const slug = req.params.slug
+            if (!slug) return resOk(res, [])
+            const doctor = await DoctorSV.oneBySlug(slug)
+            if (!doctor) return resOk(res, []);
+            const rs = await ScheduleSV.mainDId(doctor.id);
+            if (!rs) return resOk(res, []);
+            resOk(res, getActiveDays(rs.workingDays));
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

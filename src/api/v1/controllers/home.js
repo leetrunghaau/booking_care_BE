@@ -36,7 +36,7 @@ class Home {
                     id: i.id,
                     slug: i.slug,
                     name: i.name,
-                    icon: i.img,
+                    icon: i.icon,
                    
                 }
             })

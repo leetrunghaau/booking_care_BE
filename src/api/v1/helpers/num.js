@@ -3,17 +3,20 @@ const moment = require("moment");
 
 
 const formatPhoneNumber = (input) => {
+  if (!input || typeof input !== "string") return "Không có thông tin";
+
   const digits = input.replace(/\D/g, "");
 
-  if (digits.length === 0) return "";
+  // Kiểm tra nếu không đủ số hợp lệ (ví dụ < 4 ký tự) thì trả về
+  if (digits.length < 4) return "Không có thông tin";
 
   const firstGroup = digits.slice(0, 4);
   const rest = digits.slice(4);
-
   const restGroups = rest.match(/.{1,3}/g) || [];
 
   return [firstGroup, ...restGroups].join(" ");
 }
+
 
 function formatVND(amount) {
   if (typeof amount !== 'number' || isNaN(amount)) return "Không có thông tin";

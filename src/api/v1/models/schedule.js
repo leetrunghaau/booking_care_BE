@@ -58,6 +58,7 @@ const Schedule = db.define('schedule', {
     allowNull: true,
     field: 'lunch_end',
   },
+  notes: DataTypes.TEXT,
   isDefault: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

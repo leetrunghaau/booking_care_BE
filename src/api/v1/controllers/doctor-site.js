@@ -5,7 +5,6 @@ const RatingSV = require('../services/rating');
 const ScheduleSV = require('../services/schedule');
 const BookingSV = require('../services/Booking');
 const { DATEONLY } = require('sequelize');
-const generateTimeSlots = require('../helpers/time');
 const SpecialtiesSV = require('../services/specialties');
 const HospitalSV = require('../services/hospital');
 const { createListAddress } = require('../helpers/addresss');
@@ -14,12 +13,15 @@ const DoctorExperienceSV = require('../services/doctor-experiences');
 const DoctorEducationSV = require('../services/doctor-educations');
 const DoctorLanguageSV = require('../services/doctor-languages');
 const DoctorAnalysisSV = require('../services/doctor-analyses');
-const { formatPhoneNumber } = require('../helpers/num');
+const { formatPhoneNumber, formatVND } = require('../helpers/num');
 const UserSV = require('../services/user');
 const PatientSV = require('../services/patient');
 const MedicalRecordSV = require('../services/medical-record');
 const jwt = require('jsonwebtoken');
 const jwtConfig = require('../../config/jwt-config');
+const { generateTimeSlots, getReadableTimeRanges } = require('../helpers/time');
+const { pickFirstValid } = require('../helpers/obj');
+const HospitalTimeSV = require('../services/hospital-times');
 class DoctorSite {
     static async addresses(req, res, next) {
         try {
@@ -61,8 +63,8 @@ class DoctorSite {
             const doctor = await DoctorSV.oneBySlug(req.params.slug)
             if (!doctor) return resOk(res, null)
 
-            const spcialty = doctor.spcialtyId ? await SpecialtiesSV.one(doctor.spcialtyId) : "Bác sĩ đa khoa"
-            const hospital = await SpecialtiesSV.one(doctor.spcialtyId)
+            const spcialty = doctor.specialtyId ? await SpecialtiesSV.one(doctor.specialtyId) : "Bác sĩ đa khoa"
+            const hospital = doctor.hospitalId ? await HospitalSV.one(doctor.hospitalId) : "Bác sĩ đa khoa"
             const technique = (await DoctorTechniquesSV.doctor(doctor.id)).map(i => { return { id: i.id, name: i.techniqueName } })
             const experience = (await DoctorExperienceSV.doctor(doctor.id)).map(i => {
                 return {
@@ -373,22 +375,27 @@ class DoctorSite {
 
     static async doctorHospital(req, res, next) {
         try {
-            const rs = {
-                id: 1,
-                name: "Bệnh viện Nhân Dân Gia Định",
-                address: "Số 1 Nơ Trang Long, Phường 7, Quận Bình Thạnh, TP.HCM",
-                img: "https://example.com/images/bv-gia-dinh.jpg",
-                slug: "benh-vien-nhan-dan-gia-dinh",
-                times: [
-                    { weekend: 1, timeStart: 450, timeEnd: 1020 }, // Thứ 2
-                    { weekend: 2, timeStart: 450, timeEnd: 1020 }, // Thứ 3
-                    { weekend: 3, timeStart: 450, timeEnd: 1020 }, // Thứ 4
-                    { weekend: 4, timeStart: 450, timeEnd: 1020 }, // Thứ 5
-                    { weekend: 5, timeStart: 450, timeEnd: 1020 }, // Thứ 6
-                    { weekend: 6, timeStart: 450, timeEnd: 720 },  // Thứ 7
-                ]
-            }
-            resOk(res, rs);
+            const slug = req.params.slug
+            if (!slug) return resOk(res, null)
+            const doctor = await DoctorSV.oneBySlug(slug)
+            if (!doctor || !doctor.hospitalId) return resOk(res, null)
+            const hospital = await HospitalSV.one(doctor.hospitalId)
+            if (!hospital) return resOk(res, null)
+            const times = (await HospitalTimeSV.hospital(hospital.id)).map(i => {
+                return {
+                    weekend: i.weekend,
+                    timeStart: i.timeStart,
+                    timeEnd: i.timeEnd
+                }
+            })
+            resOk(res, {
+                name: hospital.name,
+                phone: formatPhoneNumber(hospital.phone),
+                address: hospital.address,
+                thumbnail: hospital.thumbnail,
+                slug: hospital.slug,
+                times: times.length > 0 ? getReadableTimeRanges(times) : ["Không có thông tin"]
+            });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -425,6 +432,27 @@ class DoctorSite {
         }
     }
 
+    static async doctorScheduleInfo(req, res, next) {
+        try {
+
+
+            const doctor = await DoctorSV.oneBySlug(req.params.slug)
+            if (!doctor) return resOk(res, null)
+
+            const schedule = await ScheduleSV.mainDId(doctor.id)
+            if (!schedule) return resOk(res, null)
+
+            resOk(res, {
+                id: doctor.id,
+                price: formatVND(schedule.appointmentPrice),
+                duration: schedule.appointmentPrice ? `${schedule.appointmentDuration} phút` : "Không có thông tin",
+                address: pickFirstValid(doctor.hospital?.address, doctor.address, "Không có thông tin")
+            });
+        } catch (error) {
+            console.log(error);
+            return next(createError.InternalServerError());
+        }
+    }
     static async doctorSchedule(req, res, next) {
         try {
 

@@ -16,11 +16,16 @@ const adminRole = require("./admin-role");
 const adminActivities = require("./admin-activity");
 const adminAppointments = require("./admin-appointment");
 const adminDoctors = require("./admin-doctor");
-const AdminFacilities = require("./admin-facilities");
+const AdminHospital = require("./admin-hospital");
 const AdminSpecialties = require("./admin-specialty");
 const AdminUsers = require("./admin-user");
 const booking = require('./booking')
 const sig = require('./sig')
+const patient = require('./patient')
+const doctorHelper = require('./doctor-helper')
+const doctorSeting = require('./doctor-setting')
+const doctorProfile = require('./doctor-profile')
+const adminPatient = require('./admin-patient')
 const test = require('./test')
 
 // router.use(f);
@@ -41,10 +46,15 @@ router.use(adminRole);
 router.use(adminActivities);
 router.use(adminAppointments);
 router.use(adminDoctors);
-router.use(AdminFacilities);
+router.use(AdminHospital);
 router.use(AdminSpecialties);
 router.use(AdminUsers);
 router.use(booking)
 router.use(sig)
+router.use(patient)
+router.use(doctorHelper )
+router.use(doctorSeting )
+router.use(doctorProfile )
+router.use(adminPatient )
 
 module.exports = router;

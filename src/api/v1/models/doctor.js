@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, STRING } = require('sequelize');
 const db = require('../../config/Database');
 const Hospital = require('./hospital');
 const Specialty = require('./specialty');
@@ -16,6 +16,7 @@ const Doctor = db.define('doctor', {
     allowNull: true,
     comment: 'name + id (6 digits)'
   },
+  code: DataTypes.STRING(64),
 
   name: {
     type: DataTypes.STRING(20),

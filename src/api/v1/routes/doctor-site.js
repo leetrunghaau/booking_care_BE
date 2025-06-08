@@ -13,6 +13,7 @@ router.post("/doctor-site/doctor/:slug/rating",authorization(["patient"]), Docto
 router.get("/doctor-site/doctor/:slug/can-rating",DoctorSite.canRating);
 router.get("/doctor-site/doctor/:slug/ratings/:len",DoctorSite.ratings);
 router.get("/doctor-site/doctor/:slug/hospital",DoctorSite.doctorHospital);
+router.get("/doctor-site/doctor/:slug/schedule/info",DoctorSite.doctorScheduleInfo);
 router.get("/doctor-site/doctor/:slug/schedule/:day",DoctorSite.doctorSchedule);
 
 

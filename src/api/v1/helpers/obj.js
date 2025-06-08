@@ -1,7 +1,9 @@
 const objAllNull = (obj) => {
     return Object.values(obj).every(v => v == undefined || v == null || v === "" || v == 0) ? null : obj;
 }
-
+function pickFirstValid(...values) {
+  return values.find(v => v != null && String(v).trim() !== "");
+}
 const normalizeEmptyToNull = (obj) =>{
   const result = {};
   for (const key in obj) {
@@ -13,5 +15,6 @@ const normalizeEmptyToNull = (obj) =>{
 }
 module.exports = {
     objAllNull, 
-    normalizeEmptyToNull
+    normalizeEmptyToNull,
+    pickFirstValid
 }

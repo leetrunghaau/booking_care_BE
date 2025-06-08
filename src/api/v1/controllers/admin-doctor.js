@@ -1,5 +1,9 @@
 const createError = require("http-errors");
 const { resOk } = require("../helpers/utils");
+const DoctorSV = require("../services/doctor");
+const HospitalSV = require("../services/hospital");
+const SpecialtiesSV = require("../services/specialties");
+const { formatPhoneNumber } = require("../helpers/num");
 
 class AdminDoctors {
   static async getAvailableDoctors(req, res, next) {
@@ -67,71 +71,49 @@ class AdminDoctors {
       return next(createError.InternalServerError());
     }
   }
-  static async getPendingDoctors(req, res, next) {
+  static async getDoctors(req, res, next) {
     try {
-      const rs = [
-        {
-          id: "P1",
-          name: "BS. Nguyễn Văn X",
-          specialty: "Tim mạch",
-          hospital: "Bệnh viện Đa khoa Tỉnh",
-          experience: "8 năm",
-          registeredDate: "15/04/2023",
-          documents: 5,
-          status: "pending",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "P2",
-          name: "BS. Trần Thị Y",
-          specialty: "Nhi khoa",
-          hospital: "Bệnh viện Nhi Đồng",
-          experience: "6 năm",
-          registeredDate: "20/04/2023",
-          documents: 4,
-          status: "pending",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "P3",
-          name: "BS. Lê Văn Z",
-          specialty: "Da liễu",
-          hospital: "Bệnh viện Da liễu",
-          experience: "5 năm",
-          registeredDate: "25/04/2023",
-          documents: 6,
-          status: "pending",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "P4",
-          name: "BS. Phạm Thị K",
-          specialty: "Thần kinh",
-          hospital: "Bệnh viện Đa khoa",
-          experience: "7 năm",
-          registeredDate: "28/04/2023",
-          documents: 5,
-          status: "pending",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        {
-          id: "P5",
-          name: "BS. Hoàng Văn M",
-          specialty: "Nội tiết",
-          hospital: "Bệnh viện Đa khoa",
-          experience: "9 năm",
-          registeredDate: "30/04/2023",
-          documents: 7,
-          status: "pending",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-      ];
-
-      resOk(res, rs);
+      let { page, hospital, specialty, search } = req.query
+      page = page ? page - 1 : 0
+      const data = await DoctorSV.allInPage(page, search, hospital, specialty)
+      const doctors = data.data.map(i => ({
+        id: i.id,
+        slug: i.slug,
+        name: i.name,
+        code: i.code,
+        email: i.user?.email ?? i.email ?? "không có thông tin",
+        img: i.img,
+        phone: formatPhoneNumber(i.phone),
+        specialty: i.specialty?.name ?? "Không có thông tin",
+        specialtyIcon: i.specialty?.icon ?? "",
+        hospital: i.hospital?.name ?? "không có thông tin"
+      }))
+      resOk(res, {
+        doctos: doctors,
+        page: page + 1,
+        totalPages: Math.ceil(data.total / 5),
+        total: data.total,
+      });
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());
     }
   }
+  static async getBase(req, res, next) {
+    try {
+      const hospitals = await HospitalSV.all()
+      const specialties = await SpecialtiesSV.all()
+
+
+      resOk(res, {
+        hospitals: hospitals,
+        specialties: specialties,
+      });
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+
 }
 module.exports = AdminDoctors;

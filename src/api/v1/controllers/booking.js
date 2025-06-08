@@ -205,11 +205,19 @@ class Booking {
             if ((!error) || error == "null" || error == "NaN") {
                 resOk(res, null, `chưa truyền id doctor và api get doctor by id (params=  ${req.params})`)
                 return
-
             }
-            const rs = await DoctorSV.one(Number(req.params.id))
+            const doctor = await DoctorSV.one(Number(req.params.id))
+            const schedule = await ScheduleSV.mainDId(doctor.id)
+            resOk(res, {
+                id: doctor.id,
+                name: doctor.name,
+                title: "",
+                specialtyName:doctor.specialty?.name ?? "Đa khoa",
+                specialtyIcon:doctor.specialty?.icon ?? "",
+                price: schedule?.appointmentPrice ?? 0,
+                address: doctor.hospital?.address ?? (doctor.address ?? "Không có thông tin")
 
-            resOk(res, rs);
+            });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -263,9 +271,6 @@ class Booking {
 
 
     }
-
-
-
     static async info(req, res, next) {
         try {
 
@@ -283,7 +288,7 @@ class Booking {
             //user không đúng role
             if (user.role != "patient") return resOk(res, null)
 
-            let rs = await PatientSV.one(user.id)
+            let rs = await PatientSV.oneUId(user.id)
 
             if (!rs) return resOk(res, null)
 

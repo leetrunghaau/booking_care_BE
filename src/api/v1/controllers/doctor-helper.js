@@ -4,7 +4,7 @@ const DoctorSV = require("../services/doctor");
 const SpecialtiesSV = require("../services/specialties");
 
 class DoctorHeper {
-    static async getAllFAQ(req, res, next) {
+    static async header(req, res, next) {
         try {
             const doctor = await DoctorSV.onByUId(req.user.id)
             const specialty = doctor.specialtyId ? (await SpecialtiesSV.one(doctor.specialtyId)) : null
@@ -21,4 +21,4 @@ class DoctorHeper {
         }
     }
 }
-module.exports = DoctorFAQ;
+module.exports = DoctorHeper;

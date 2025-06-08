@@ -36,7 +36,9 @@ function generateTimeSlots({
 
     slots.push({
       start: formatTime(current),
-      end: formatTime(next)
+      startNum: current,
+      end: formatTime(next),
+      endNum: next
     });
   }
 

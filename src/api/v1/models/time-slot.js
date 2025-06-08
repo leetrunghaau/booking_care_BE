@@ -24,17 +24,7 @@ const TimeSlot = db.define('timeSlot', {
     defaultValue: 15,
     comment: 'Thời gian mỗi khung (phút)',
   },
-  time: {
-    type: DataTypes.JSON,
-    allowNull: false,
-    comment: `Danh sách khung giờ trong ngày dưới dạng:
-    [{
-      timeStart: number,         // hh:mm => phút (vd: 9:00 => 540)
-      status: "booked" | "available" | "locked", // Trạng thái khung giờ
-      bookingId: number,         // ID từ bảng booking (không có ràng buộc)
-      name: string               // Tên bệnh nhân (truy vấn nhanh)
-    }]`,
-  },
+  time: DataTypes.TIME,
 }, {
   tableName: 'time_slots',
   timestamps: false,

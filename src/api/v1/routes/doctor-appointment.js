@@ -1,7 +1,7 @@
 const express = require("express");
 const { authorization } = require("../middlewares/auth-middleware");
-const { uploadFileWithSubPath } = require("../middlewares/upload-middleware");
 const DoctorAppointment = require("../controllers/doctor-appointment");
+const { uploadSingleFileWithSubPath } = require("../middlewares/upload-middleware");
 const router = express.Router();
 
 
@@ -25,6 +25,6 @@ router.get("/doctor-appointments/by-history", authorization(["doctor"]), DoctorA
 router.get("/doctor-appointments/by-all", authorization(["doctor"]), DoctorAppointment.byAll);
 router.get("/doctor-appointment/:id/status", authorization(["doctor"]), DoctorAppointment.getStatus);
 router.post("/doctor-appointment/:id/status", authorization(["doctor"]), DoctorAppointment.updateStatus);
-router.post("/doctor-appointment/:id/update", uploadFileWithSubPath("file", "/appointment"), DoctorAppointment.upfile);
+router.post("/doctor-appointment/:id/update", uploadSingleFileWithSubPath("file", "/appointment"), DoctorAppointment.upfile);
 
 module.exports = router;

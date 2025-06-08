@@ -12,7 +12,7 @@ const { generateTimeSlots, availableTimeSlot, isMedicineStillInUse, calculateEnd
 const PrescriptionSV = require("../services/prescriptions");
 const VitalsSV = require("../services/vitals");
 const FileStoreSV = require("../services/files-store");
-const { objAllNull, normalizeEmptyToNull } = require("../helpers/obj");
+const { objAllNull, normalizeEmptyToNull, pickFirstValid } = require("../helpers/obj");
 const BookingFileSV = require("../services/booking-file");
 const BookingPrescriptionSV = require("../services/booking-prescriptions");
 const AllergySV = require("../services/allergy");
@@ -153,8 +153,53 @@ class DoctorAppointment {
       if (!id || isNaN(Number(id))) return resOk(res, null, "Bạn cần truyền đúng thông tin");
       if (!status || !(['pending', 'confirmed', 'completed', 'cancelled'].includes(status)))
         return resOk(res, null, "Bạn cần truyền đúng thông tin.");
+
       const booking = await BookingSV.edit(id, { status: status })
       if (booking == 0) return resOk(res, null, "Không đổi được trạng thái booking")
+      if (status == "completed") {
+        // gọi thông tin
+        const newBooking = await BookingSV.one(id);
+        const newBookingFile = await BookingFileSV.allByBookingId(newBooking.id);
+        const newPrescription = await BookingPrescriptionSV.allByBookingId(newBooking.id)
+        const record = await MedicalRecordSV.up({
+          patientId: newBooking.patientId,
+          doctorId: newBooking.doctorId,
+          bookingId: newBooking.id,
+          visitDate: moment(new Date).format('YYYY-MM-DD'),
+          reason: pickFirstValid(newBooking.reason, newBooking.symptoms, newBooking.diagnosis),
+          symptoms: pickFirstValid(newBooking.symptoms, newBooking.reason, newBooking.diagnosis),
+          diagnosis: newBooking.diagnosis,
+          finalDiagnosis: newBooking.finalDiagnosis,
+          notes: newBooking.notes,
+          generalInstructions: newBooking.generalInstructions,
+          temperature: newBooking.temperature,
+          pulse: newBooking.pulse,
+          bloodPressure: newBooking.bloodPressure,
+          respiratoryRate: newBooking.respiratoryRate,
+          weight: newBooking.weight,
+          height: newBooking.height
+        })
+        await Promise.all(newBookingFile.map(iFile =>
+          FileStoreSV.up({
+            medicalRecordId: record.id,
+            fileName: iFile.name,
+            fileType: iFile.type,
+            fileUrl: iFile.url
+          })
+        ))
+
+        await Promise.all(newPrescription.map(ipr =>
+          PrescriptionSV.up({
+            medicalRecordId: record.id,
+            useStart: moment(new Date()).format('YYYY-MM-DD'),
+            name: ipr.name,
+            dosage: ipr.dosage,
+            usage: ipr.usage,
+            duration: ipr.duration,
+            notes: ipr.notes,
+          })
+        ))
+      }
       resOk(res, true)
     } catch (error) {
       console.log(error);
@@ -266,7 +311,7 @@ class DoctorAppointment {
           id: i.id,
           visitDate: i.visitDate ?? "không có thông tin",
           doctorName: i.doctor?.name ?? "Không có thông tin",
-          symptoms: i.symptoms ?? "",
+          symptoms: i.symptoms ?? i.reason ?? i.diagnosis,
           finalDiagnosis: i.finalDiagnosis ?? "",
           notes: i.notes ?? "",
           bloodPressure: i.bloodPressure ?? "",

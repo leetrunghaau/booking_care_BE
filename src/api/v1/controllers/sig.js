@@ -9,6 +9,7 @@ const { hashPassword, comparePasswords } = require("../../v1/helpers/password-cr
 const { sendResetPasswordEmail } = require("../helpers/mailer");
 const jwt = require('jsonwebtoken');
 const jwtConfig = require("../../config/jwt-config");
+const AdminSV = require("../services/admin");
 
 class Sig {
 
@@ -77,7 +78,7 @@ class Sig {
             if (req.user.role == "doctor") {
                 rs = await DoctorSV.onByUId(req.user.id)
             } else if (req.user.role == "admin") {
-                rs = await DoctorSV.onByUId(req.user.id)
+                rs = await AdminSV.oneUId(req.user.id)
             }
             if (req.user.role == "patient") {
                 rs = await PatientSV.oneUId(req.user.id)

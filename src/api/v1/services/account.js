@@ -10,6 +10,9 @@ class AccountSV {
     static async up(data) {
         return await  Account.create(data);
     }
+    static async down(id) {
+        return await Account.destroy({ where: { id } });
+    }
     static async edit(id, data) {
         return await  Account.update(data, { where: { id } });
     }

@@ -2,11 +2,53 @@ const Doctor = require("../models/doctor");
 const Hospital = require("../models/hospital");
 const Specialty = require("../models/specialty");
 const { Op } = require('sequelize');
+const User = require("../models/user");
 
 class DoctorSV {
     static async all() {
-        return await Doctor.findAll({ include: [{ model: Hospital }, { model: Specialty }] });
+        return await Doctor.findAll({ include: [{ model: Hospital }, { model: Specialty }, { model: User }] });
     }
+
+    static async allInPage(page = 0, search = null, hospital = null, specialty = null) {
+    const limit = 5;
+    const offset = page * limit;
+
+    const where = {};
+
+    if (search) {
+        where.name = {
+            [Op.like]: `%${search}%`
+        };
+    }
+
+    if (hospital) {
+        where.hospitalId = Number(hospital);
+    }
+
+    if (specialty) {
+        where.specialtyId = Number(specialty);
+    }
+
+    const { count, rows } = await Doctor.findAndCountAll({
+        where,
+        limit,
+        offset,
+        include: [
+            { model: Hospital },
+            { model: Specialty },
+            { model: User }
+        ],
+        // order: [['createdAt', 'DESC']] // hoặc theo cách bạn muốn
+    });
+
+    // const totalPages = Math.ceil(count / limit);
+
+    return {
+        data: rows,
+        total: count,
+    };
+}
+
 
     static async all2(specialtiesIds = [], address = []) {
         const hospitalWhere = {};

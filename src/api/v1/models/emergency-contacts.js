@@ -20,21 +20,16 @@ const EmergencyContact = db.define('emergencyContact', {
     onDelete: 'CASCADE',
   },
 
-  fullName: {
-    type: DataTypes.STRING(100),
-    field: 'full_name',
-    allowNull: true,
-  },
+  name: DataTypes.STRING(100),
+  relationship: DataTypes.STRING(50),
+  phone: DataTypes.STRING(15),
+  address: DataTypes.TEXT,
 
-  relationship: {
-    type: DataTypes.STRING(50),
-    allowNull: true,
-  },
 
-  phone: {
-    type: DataTypes.STRING(15),
-    allowNull: true,
-  },
+  name: "",
+  relationship: "",
+  phone: "",
+  address: ""
 
 }, {
   tableName: 'emergency_contacts',

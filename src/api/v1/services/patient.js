@@ -37,6 +37,9 @@ class PatientSV {
     static async oneUId(id) {
         return await Patient.findOne({ where: { userId: id }, include: [{ model: User }] });
     }
+    static async oneEmail(email) {
+        return await Patient.findOne({ where: { email: email }, include: [{ model: User }] });
+    }
     static async up(data) {
         return await Patient.create(data, {include: [{ model: User }]});
     }

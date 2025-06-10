@@ -10,6 +10,7 @@ const doctorAppointment = require("./doctor-appointment");
 const doctorFAQ = require("./doctor-faq");
 const DoctorRating = require("./doctor-rating");
 const DoctorSchedule = require("./doctor-schedule");
+const DoctorNotification = require("./doctor-notification");
 const home = require("./home");
 const adminAccount = require("./admin-account");
 const adminRole = require("./admin-role");
@@ -27,6 +28,7 @@ const doctorSeting = require('./doctor-setting')
 const doctorProfile = require('./doctor-profile')
 const adminPatient = require('./admin-patient')
 const test = require('./test')
+const chat = require('./chat/test')
 
 // router.use(f);
 // Define routes
@@ -40,6 +42,7 @@ router.use(doctorAppointment);
 router.use(doctorFAQ);
 router.use(DoctorRating);
 router.use(DoctorSchedule);
+router.use(DoctorNotification);
 router.use(home);
 router.use(adminAccount);
 router.use(adminRole);
@@ -56,5 +59,6 @@ router.use(doctorHelper )
 router.use(doctorSeting )
 router.use(doctorProfile )
 router.use(adminPatient )
+router.use(chat )
 
 module.exports = router;

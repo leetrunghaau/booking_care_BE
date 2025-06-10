@@ -7,9 +7,16 @@ class NotificationPatientSV {
         return await NotificationPatient.findAll()
     }
     static async allBPatient(id) {
+    return await NotificationPatient.findAll({
+        where: { patientId: id },
+        order: [
+            ['isRead', 'ASC'],      
+            ['createdAt', 'DESC']   
+        ],
+        limit: 10
+    });
+}
 
-        return await NotificationPatient.findAll({ where: { patientId: id } })
-    }
     static async allMyUnRead(id) {
 
         return await NotificationPatient.findAll({ where: { patientId: id , isRead: false} })

@@ -7,6 +7,8 @@ const MedicalRecordSV = require('../services/medical_records');
 const moment = require('moment');
 const DoctorSV = require('../services/doctor');
 const HospitalSV = require('../services/hospital');
+const { sendAppointmentCancelToDoctor } = require('../helpers/mailer');
+const { formatPhoneNumber, formatTime } = require('../helpers/num');
 class PatientBooking {
 
     static async all(req, res, next) {
@@ -115,6 +117,24 @@ class PatientBooking {
 
             await BookingSV.edit(booking.id, { status: "cancelled" });
 
+            const doctorForMail = await DoctorSV.one(booking.doctorId)
+            const patientForMail = await PatientSV.one(booking.patientId)
+            const mailto = doctorForMail.user?.email ?? doctorForMail.email ?? null
+
+            if (mailto) {
+                sendAppointmentCancelToDoctor(
+                    mailto,
+                    {
+                        doctorName: doctorForMail.name,
+                        patientName: patientForMail.name,
+                        patientEmail: patientForMail.user?.email ?? patientForMail.email ?? "Không có mail",
+                        patientPhone: formatPhoneNumber(patient.phone),
+                        date: moment(booking.day).format("dddd, DD-MM-YYYY"),
+                        time: formatTime(booking.time),
+                        reason: "Tôi có việc đột xuất, không thể đến đúng giờ."
+                    }
+                );
+            }
             return resOk(res, {
                 success: true,
                 message: "Đã huỷ lịch khám thành công.",

@@ -16,6 +16,8 @@ const { objAllNull, normalizeEmptyToNull, pickFirstValid } = require("../helpers
 const BookingFileSV = require("../services/booking-file");
 const BookingPrescriptionSV = require("../services/booking-prescriptions");
 const AllergySV = require("../services/allergy");
+const { sendPrescriptionDetailEmail, sendAppointmentCancelledEmail, sendConsultationResultToPatient, sendAppointmentConfirmedToPatient } = require("../helpers/mailer");
+const mailConfig = require("../../config/mail-config");
 
 class DoctorAppointment {
 
@@ -199,6 +201,69 @@ class DoctorAppointment {
             notes: ipr.notes,
           })
         ))
+
+
+        const patientForMail = await PatientSV.one(newBooking.patientId)
+        const doctorForMail = await DoctorSV.one(newBooking.doctorId)
+        const mailto = patientForMail.user?.email ?? patientForMail.email ?? null;
+        if (mailto) {
+          sendConsultationResultToPatient(
+            mailto,
+            {
+              patientName: patientForMail.name,
+              doctorName: doctorForMail.name,
+              date: moment(newBooking.day).format('dddd, DD/MM/YYYY'),
+              time: formatTime(newBooking.time),
+              diagnosis: newBooking.diagnosis,
+              conclusion: newBooking.finalDiagnosis,
+              instructions: newBooking.notes,
+              resultLink: `${mailConfig.FE_SERVER}/benh-nhan/lich-su-kham`
+            }
+          );
+        }
+      }
+      if (status == "cancelled") {
+        const bookingForMail = await BookingSV.one(Number(id));
+        const patientForMail = await PatientSV.one(bookingForMail.patientId)
+        const doctorForMail = await DoctorSV.one(bookingForMail.doctorId)
+        const mailto = patientForMail.user?.email ?? patientForMail.email ?? null;
+        if (mailto) {
+          sendAppointmentCancelledEmail(
+            mailto,
+            {
+              patientName: patientForMail.name,
+              doctorName: doctorForMail.name,
+              date: moment(bookingForMail.day).format('dddd, DD/MM/YYYY'),
+              time: formatTime(bookingForMail.time),
+              cancelReason: "bác sĩ có việc đột xuất",
+              rebookLink: `${mailConfig.FE_SERVER}/dat-lich-kham`
+            }
+          );
+        }
+      }
+      if (status == "confirmed") {
+        const bookingForMail = await BookingSV.one(id);
+        const patientForMail = await PatientSV.one(bookingForMail.patientId)
+        const doctorForMail = await DoctorSV.one(bookingForMail.doctorId)
+        const mailto = patientForMail.user?.email ?? patientForMail.email ?? null;
+        if (mailto) {
+          sendAppointmentConfirmedToPatient(
+            mailto,
+            {
+              patientName: patientForMail.name,
+              doctorName: doctorForMail.name,
+              date: moment(bookingForMail.day).format('dddd, DD/MM/YYYY'),
+              time: formatTime(bookingForMail.time),
+              location: pickFirstValid(
+                doctorForMail.hospital.address,
+                doctorForMail.address,
+                "Không có thông tin, vui lòng lên hệ với quản kỹ thuật viên để hể trợ"
+              ),
+              reason: bookingForMail.reason,
+              manageLink: `${mailConfig.FE_SERVER}/benh-nhan/lich-kham/${bookingForMail.id}`
+            }
+          );
+        }
       }
       resOk(res, true)
     } catch (error) {
@@ -612,6 +677,94 @@ class DoctorAppointment {
         prescriptions: prescriptionRS,
 
       });
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+
+  }
+
+
+  static async updateFiles(req, res, next) {
+    try {
+      const bookingId = Number(req.params.bookingId)
+      if (!bookingId) return resOk(res, []);
+      const booking = await BookingSV.one(Number(bookingId))
+      if (!booking) return resOk(res, [])
+      for (const file of req.customFiles) {
+        await BookingFileSV.up({
+          bookingId: bookingId,
+
+          name: file.originalname,
+          type: file.mimetype,
+          url: `/${file.subPath}/${file.filename}`,
+        })
+      }
+      console.log(req.customFiles)
+      const rs = await BookingFileSV.allByBookingId(bookingId)
+      resOk(res, rs)
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+
+  }
+
+  static async downFile(req, res, next) {
+    try {
+      const bookingId = Number(req.params.bookingId)
+      const id = Number(req.params.id)
+      if (!bookingId) return resOk(res, null);
+      if (!id) return resOk(res, null);
+      const booking = await BookingSV.one(Number(bookingId))
+      if (!booking) return resOk(res, null)
+      await BookingFileSV.down(id)
+      const rs = BookingFileSV.allByBookingId(bookingId)
+      resOk(res, rs)
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+
+  }
+
+  static async sendMailToPatient(req, res, next) {
+    try {
+      const bookingId = Number(req.params.bookingId)
+      if (!bookingId) return resOk(res, null);
+      const booking = await BookingSV.one(Number(bookingId))
+      if (!booking) return resOk(res, null)
+      const doctor = await DoctorSV.one(booking.doctorId)
+      if (!doctor) return resOk(res, null)
+      const patient = await PatientSV.one(booking.patientId)
+      if (!patient) return resOk(res, null)
+
+      const prescriptionRS = (await BookingPrescriptionSV.allByBookingId(booking.id)).map(i => ({
+        id: i.id,
+        name: i.name ?? "",
+        dosage: i.dosage ?? "",
+        frequency: i.usage ?? "",
+        duration: i.duration ?? "",
+        instructions: i.notes ?? ""
+      }))
+      const emailTo = patient.user.email ?? patient.email ?? null
+      if (!emailTo) return resOk(res, null)
+      sendPrescriptionDetailEmail(
+        emailTo,
+        {
+          patientName: patient.name,
+          patientAge: calculateAge(patient.dob),
+          patientGender: getVNGender(patient.gender),
+          diagnosis: booking.finalDiagnosis ?? "",
+          generalInstructions: booking.generalInstructions ?? "",
+          doctorName: doctor.name,
+          doctorSpecialty: doctor.specialty?.name ?? "Bác sĩ đa khoa",
+          doctorHospital: doctor.hospital?.name ?? "Bác sĩ tư nhân"
+        },
+        prescriptionRS
+      );
+
+      return resOk(res, true);
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());

@@ -119,10 +119,10 @@ class DoctorSV {
         return await Doctor.findOne({ where: { slug: slug }, include: [{ model: Hospital }, { model: Specialty }] });
     }
     static async one(id) {
-        return await Doctor.findOne({ where: { id: id }, include: [{ model: Hospital }, { model: Specialty }] });
+        return await Doctor.findOne({ where: { id: id }, include: [{ model: Hospital }, { model: Specialty }, { model: User }] });
     }
     static async onByUId(id) {
-        return await Doctor.findOne({ where: { userId: id }, include: [{ model: Hospital }, { model: Specialty }] });
+        return await Doctor.findOne({ where: { userId: id }, include: [{ model: Hospital }, { model: Specialty }, { model: User }] });
     }
 }
 

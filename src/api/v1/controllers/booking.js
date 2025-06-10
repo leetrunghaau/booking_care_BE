@@ -4,7 +4,7 @@ const SpecialtiesSV = require('../services/specialties');
 const HospitalSV = require('../services/hospital');
 const DoctorSV = require('../services/doctor');
 const { createListAddress, getProvince } = require('../helpers/addresss');
-const { normalizeText } = require('../helpers/text');
+const { normalizeText, calculateAge, getVNGender } = require('../helpers/text');
 const ScheduleSV = require('../services/schedule');
 const BookingSV = require('../services/Booking');
 const jwtConfig = require('../../config/jwt-config');
@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const UserSV = require('../services/user');
 const PatientSV = require('../services/patient');
 const AccountSV = require('../services/account');
+const moment = require("moment");
 const { hashPassword } = require("../../v1/helpers/password-crypt");
 const DiseaseSV = require('../services/disease');
 const SymptomsSV = require('../services/symptom');
@@ -20,6 +21,8 @@ const DiseaseSymptomsSV = require('../services/disease-symptoms');
 const DiseaseSpecialtySV = require('../services/disease-specialty');
 const { generateTimeSlots } = require('../helpers/time');
 const { getActiveDays } = require('../helpers/dayly');
+const { sendAppointmentEmail, sendNewAppointmentEmailToDoctor } = require('../helpers/mailer');
+const { formatPhoneNumber, formatTime } = require('../helpers/num');
 class Booking {
     static async symptoms(req, res, next) {
         // try {
@@ -325,19 +328,20 @@ class Booking {
                 if (input.patientId) return input.patientId;
                 if (!input.email) return null;
 
-                // Tìm hoặc tạo user theo email
+                // Tìm user theo email
                 let user = await UserSV.oneEmail(input.email);
-                if (!user) {
-                    user = await UserSV.up({ email: input.email });
-                }
+                // niếu có thì dùng user
+                if (user) {
+                    const existingPatient = await PatientSV.oneUId(user.id);
+                    if (existingPatient) return existingPatient.id;
 
-                // Kiểm tra bệnh nhân đã tồn tại theo userId
-                const existingPatient = await PatientSV.oneUId(user.id);
+                }
+                //niếu không có thì tìm tiếp trong patient
+                const existingPatient = await PatientSV.oneEmail(input.email);
                 if (existingPatient) return existingPatient.id;
 
                 // Nếu chưa có, tạo bệnh nhân mới
                 const newPatient = await PatientSV.up({
-                    userId: user.id,
                     name: input.name,
                     dob: input.dob,
                     phone: input.phone,
@@ -364,6 +368,8 @@ class Booking {
                 return resOk(res, null, "Không thể xác định bệnh nhân");
             }
 
+            const patient = await PatientSV.one(patientId)
+
             const bookingData = {
                 patientId,
                 doctorId: doctor.id,
@@ -373,6 +379,41 @@ class Booking {
                 reason: input.symptoms,
                 duration: schedule.appointmentDuration ?? 0
             };
+
+            const mailToPatient = patient.user?.email ?? patient.email ?? null
+            const mailToDoctor = doctor.user?.email ?? doctor.email ?? null
+
+            if (mailToPatient) {
+                sendAppointmentEmail(
+                    mailToPatient,
+                    {
+                        patientName: (await PatientSV.one(patientId)).name,
+                        doctorName: doctor.name,
+                        time: input.time,
+                        date: input.date,
+                        location: doctor.hospital?.address ?? doctor.address ?? "Vui lòng gọi cho quản trị viên",
+                    }
+                )
+            }
+
+
+            if (mailToDoctor) {
+
+                sendNewAppointmentEmailToDoctor(
+                    mailToDoctor,
+                    {
+                        doctorName: doctor.name,
+                        patientName: patient.name,
+                        patientAge: calculateAge(patient.dob),
+                        patientGender: getVNGender(patient.gender),
+                        patientEmail: mailToPatient,
+                        patientPhone: formatPhoneNumber(patient.phone),
+                        date: moment(bookingData.day).format('dddd, DD-MM-YYYY'),
+                        time: formatTime(bookingData.time),
+                        reason: bookingData.reason
+                    }
+                );
+            }
 
             const result = await BookingSV.up(bookingData);
             return resOk(res, result);

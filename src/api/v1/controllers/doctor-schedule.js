@@ -110,7 +110,7 @@ class DoctorSchedule {
         patient: {
           name: booking.patient?.name ?? "",
           gender: booking.patient?.gender ?? "Khác",
-          dateOfBirth: moment(booking.patient?.dob).format("DD/MM/YYYY"),
+          dateOfBirth: moment(booking.patient?.dob).format("DD-MM-YYYY"),
           phone: formatPhoneNumber(booking.patient?.phone),
           email: booking.patient?.email,
           address: booking.patient?.address ?? "",

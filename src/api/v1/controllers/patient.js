@@ -57,7 +57,7 @@ class Patient {
             const patient = await PatientSV.oneUId(req.user.id)
             if (!patient) return resOk(res, null)
             const tem = await PatientSV.edit(patient.id, { img: `/${req.customFile.subPath}/${req.customFile.filename}` })
-            resOk(res, true);
+            resOk(res, `/${req.customFile.subPath}/${req.customFile.filename}`);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -87,11 +87,11 @@ class Patient {
                 status: true,
                 relative: relative,
                 info: {
-                    img: patient.img ?? "", 
+                    img: patient.img ?? "",
                     name: patient.name ?? "",
-                    dob: patient.dob??"",
-                    gender: patient.gender??"",
-                    phone: patient.phone ?? ""  ,
+                    dob: patient.dob ?? "",
+                    gender: patient.gender ?? "",
+                    phone: patient.phone ?? "",
                     email: patient.user?.email ?? patient.email ?? "",
                     address: patient.address ?? "",
                 }

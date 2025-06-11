@@ -61,11 +61,18 @@ class Sig {
                 resOk(res, null, "Email đã được đăng ký!")
                 return
             }
+
             const user = await UserSV.up({ email: input.email, isLock: false })
             const pass = await hashPassword(input.password)
             const acc = await AccountSV.up({ userId: user.id, pass: pass })
-            const patient = await PatientSV.up({ name: input.fullName, phone: input.phone, userId: user.id })
-            resOk(res, patient);
+            const patient = await PatientSV.oneEmail(input.email)
+            if (patient) {
+                await PatientSV.edit(patient.id, { name: input.fullName, phone: input.phone, userId: user.id })
+            } else {
+                await PatientSV.up({ name: input.fullName, phone: input.phone, userId: user.id })
+            }
+
+            resOk(res, true);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

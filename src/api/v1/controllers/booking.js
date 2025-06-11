@@ -344,6 +344,7 @@ class Booking {
                 const newPatient = await PatientSV.up({
                     name: input.name,
                     dob: input.dob,
+                    email: input.email,
                     phone: input.phone,
                     gender: input.gender,
                     address: input.address,

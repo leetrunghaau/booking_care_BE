@@ -40,7 +40,6 @@ class BookingSV {
                 }
             ],
             order: [
-                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
                 ['day', 'DESC'],
                 ['time', 'DESC']
             ]
@@ -64,9 +63,8 @@ class BookingSV {
                 }
             ],
             order: [
-                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
                 ['day', 'DESC'],
-                ['time', 'DESC']
+                ['time', 'ASC']
             ]
         });
     }
@@ -104,9 +102,8 @@ class BookingSV {
                 }
             ],
             order: [
-                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
                 ['day', 'DESC'],
-                ['time', 'DESC']
+                ['time', 'ASC']
             ]
         });
     }
@@ -149,9 +146,8 @@ class BookingSV {
                 }
             ],
             order: [
-                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
                 ['day', 'DESC'],
-                ['time', 'DESC']
+                ['time', 'ASC']
             ]
         });
     }
@@ -190,7 +186,7 @@ class BookingSV {
             ],
             order: [
                 ['day', 'DESC'],
-                ['time', 'DESC']
+                ['time', 'ASC']
             ]
         });
     }

@@ -69,7 +69,8 @@ class Sig {
             if (patient) {
                 await PatientSV.edit(patient.id, { name: input.fullName, phone: input.phone, userId: user.id })
             } else {
-                await PatientSV.up({ name: input.fullName, phone: input.phone, userId: user.id })
+                const newPatient = await PatientSV.up({ name: input.fullName, phone: input.phone, userId: user.id })
+                await PatientSV.edit(newPatient.id, { code: `BN-${newPatient.id.toString().padStart(6, '0')}` })
             }
 
             resOk(res, true);

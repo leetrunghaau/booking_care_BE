@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const Booking = require("../models/booking");
 const Doctor = require("../models/doctor");
 const Hospital = require("../models/hospital");
@@ -38,6 +38,11 @@ class BookingSV {
                     model: Doctor,
                     include: [{ model: User }, { model: Hospital }, { model: Specialty }]
                 }
+            ],
+            order: [
+                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
+                ['day', 'DESC'],
+                ['time', 'DESC']
             ]
         });
     }
@@ -57,6 +62,11 @@ class BookingSV {
                     model: Doctor,
                     include: [{ model: User }, { model: Hospital }]
                 }
+            ],
+            order: [
+                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
+                ['day', 'DESC'],
+                ['time', 'DESC']
             ]
         });
     }
@@ -93,7 +103,11 @@ class BookingSV {
                     include: [{ model: User }, { model: Hospital }]
                 }
             ],
-            order: [['day', 'ASC'], ['time', 'ASC']]
+            order: [
+                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
+                ['day', 'DESC'],
+                ['time', 'DESC']
+            ]
         });
     }
 
@@ -134,7 +148,11 @@ class BookingSV {
                     include: [{ model: User }, { model: Hospital }, { model: Specialty }]
                 }
             ],
-            order: [['day', 'ASC'], ['time', 'ASC']]
+            order: [
+                Sequelize.literal(`FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled')`),
+                ['day', 'DESC'],
+                ['time', 'DESC']
+            ]
         });
     }
 
@@ -170,7 +188,10 @@ class BookingSV {
                     include: [{ model: Hospital }]
                 }
             ],
-            order: [['day', 'DESC']]
+            order: [
+                ['day', 'DESC'],
+                ['time', 'DESC']
+            ]
         });
     }
 

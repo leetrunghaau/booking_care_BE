@@ -11,6 +11,7 @@ const getFullURL = require('../helpers/app-url');
 const { deleteFile } = require('../helpers/files');
 const { hashPassword } = require('../helpers/password-crypt');
 const AccountSV = require('../services/account');
+const { getVNGender } = require('../helpers/text');
 
 class Patient {
 
@@ -90,7 +91,7 @@ class Patient {
                     img: patient.img ?? "",
                     name: patient.name ?? "",
                     dob: patient.dob ?? "",
-                    gender: patient.gender ?? "",
+                    gender: getVNGender(patient.gender),
                     phone: patient.phone ?? "",
                     email: patient.user?.email ?? patient.email ?? "",
                     address: patient.address ?? "",

@@ -13,8 +13,7 @@ class HospitalSV {
         if (ids.length > 0) return await Hospital.findAll({ where: { id: ids } });
         return await Hospital.findAll();
     }
-    static async allInPage(page = 0, search = null) {
-        const limit = 5;
+    static async allInPage(page = 0, limit = 5, search = null, address = null) {
         const offset = page * limit;
 
         const where = {};
@@ -22,6 +21,12 @@ class HospitalSV {
         if (search) {
             where.name = {
                 [Op.like]: `%${search}%`
+            };
+        }
+ 
+        if (address) {
+            where.address = {
+                [Op.like]: `%${address}%`
             };
         }
 
@@ -46,6 +51,9 @@ class HospitalSV {
     }
      static async up(data) {
         return await Hospital.create(data)
+    }
+    static async edit(id, data) {
+        return await Hospital.update(data,{where:{id: id}})
     }
      static async down(id) {
         return await Hospital.destroy({ where: { id: id } })

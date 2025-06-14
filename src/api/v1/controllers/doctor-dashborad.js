@@ -2,6 +2,9 @@ const createError = require("http-errors");
 const { resOk } = require("../helpers/utils");
 const DoctorSV = require("../services/doctor");
 const BookingSV = require("../services/Booking");
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class DoctorDashboard {
     static async sumBooking(req, res, next) {

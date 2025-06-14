@@ -15,6 +15,8 @@ const PrescriptionSV = require('../services/prescriptions');
 const { pickFirstValid } = require('../helpers/obj');
 const { formatTime, calculateBMI } = require('../helpers/num');
 const { calculateAge, getVNGender } = require('../helpers/text');
+require('moment/locale/vi');
+moment.locale('vi');
 
 class PatientRecord {
 

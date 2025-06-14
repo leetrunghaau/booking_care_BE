@@ -2,6 +2,9 @@ const createError = require("http-errors");
 const { resOk } = require("../helpers/utils");
 const DoctorSV = require("../services/doctor");
 const SpecialtiesSV = require("../services/specialties");
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class DoctorHeper {
     static async header(req, res, next) {

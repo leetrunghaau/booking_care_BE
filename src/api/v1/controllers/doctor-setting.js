@@ -5,7 +5,9 @@ const SpecialtiesSV = require("../services/specialties");
 const AccountSV = require("../services/account");
 const { comparePasswords, hashPassword } = require("../helpers/password-crypt");
 const UserSV = require("../services/user");
-
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 class DoctorSetting {
     static async rePass(req, res, next) {
         try {
@@ -61,7 +63,7 @@ class DoctorSetting {
                 const checkEmail = await UserSV.oneEmail(input.email);
                 if (checkEmail && checkEmail.email !== req.user.email) {
                     return resOk(res, { data: null, st: "Email đã được đăng ký!" });
-                }else{
+                } else {
 
                     await UserSV.edit(req.user.id, { email: input.email });
                 }

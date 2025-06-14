@@ -12,6 +12,8 @@ const { deleteFile } = require('../helpers/files');
 const { hashPassword } = require('../helpers/password-crypt');
 const AccountSV = require('../services/account');
 const { getVNGender } = require('../helpers/text');
+require('moment/locale/vi');
+moment.locale('vi');
 
 class Patient {
 
@@ -92,6 +94,7 @@ class Patient {
                     name: patient.name ?? "",
                     dob: patient.dob ?? "",
                     gender: getVNGender(patient.gender),
+                    genderEN: patient.gender,
                     phone: patient.phone ?? "",
                     email: patient.user?.email ?? patient.email ?? "",
                     address: patient.address ?? "",

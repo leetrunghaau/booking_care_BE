@@ -7,6 +7,12 @@ const HospitalServiceSV = require("../services/hospital-services");
 const HospitalSpecialty = require("../models/hospital-specialties");
 const HospitalSpecialtySV = require("../services/hospital-specialties");
 const DoctorSV = require("../services/doctor");
+const moment = require("moment");
+const { deleteFile } = require("../helpers/files");
+const HospitalImageSV = require("../services/hospital-images");
+const SpecialtiesSV = require("../services/specialties");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class AdminHospital {
 
@@ -14,7 +20,7 @@ class AdminHospital {
     try {
       let { page, search } = req.query
       page = page ? page - 1 : 0
-      const data = await HospitalSV.allInPage(page, search)
+      const data = await HospitalSV.allInPage(page, 5, search)
       const hospitals = data.data.map(i => ({
         id: i.id,
         name: i.name,
@@ -83,16 +89,17 @@ class AdminHospital {
   static async getBasic(req, res, next) {
     try {
       const id = Number(req.params.id)
-      if (!id) return resOk(res, false);
+      if (!id) return resOk(res, null);
 
-      const hospital = await HospitalSV.one(id);  
+      const hospital = await HospitalSV.one(id);
       if (!hospital) return resOk(res, null);
-      const times = (await HospitalTimeSV.hospital(hospital.id)).map(time => ({
-        dayOfWeek: time.dayOfWeek,
-        startTime: time.startTime,
-        endTime: time.endTime
-      }));
-      
+      const times = (await HospitalTimeSV.hospital(hospital.id)).map(i => ({
+        id: i.id,
+        dayOfWeek: i.weekend,
+        startTime: i.timeStart,
+        endTime: i.timeEnd
+      }))
+
       resOk(res, {
         id: hospital.id,
         name: hospital.name,
@@ -101,7 +108,7 @@ class AdminHospital {
         phone: formatPhoneNumber(hospital.phone),
         license: hospital.license,
         image: hospital.thumbnail,
-        year: hospital.year,
+        year: hospital.years,
         mapEmbedUrl: hospital.mapEmbedUrl,
         times: times
       });
@@ -118,29 +125,36 @@ class AdminHospital {
       const input = req.body;
       const hospital = await HospitalSV.one(id);
       if (!hospital) return resOk(res, null);
-      hospital.name = input.name;
-      hospital.about = input.description;
-      hospital.address = input.address;
-      hospital.phone = input.phone;
-      hospital.license = input.license;
-      hospital.year = input.year;
-      hospital.mapEmbedUrl = input.mapEmbedUrl;
-      await hospital.save();
+
+      await HospitalSV.edit(hospital.id, {
+        name: input.name,
+        about: input.about,
+        address: input.address,
+        phone: input.phone,
+        license: input.license,
+        years: input.year ?? 0,
+        mapEmbedUrl: input.mapEmbedUrl,
+      })
+
+      if (!input.image) {
+        deleteFile(hospital.thumbnail)
+        await HospitalSV.edit(hospital.id, { thumbnail: null })
+      }
+
       const existingTimes = await HospitalTimeSV.hospital(hospital.id);
-      const existingTimeIds = existingTimes.map(time => time.id); 
-      const newTimes = input.openingHours.filter(time => !existingTimeIds.includes(time.id));
-      const timesToDelete = existingTimes.filter(time => !input.openingHours.some(t => t.id === time.id));
+      const existingTimeIds = existingTimes.map(time => time.id);
+      const newTimes = input.times.filter(time => !existingTimeIds.includes(time.id));
+      const timesToDelete = existingTimes.filter(time => !input.times.some(t => t.id === time.id));
       for (const time of timesToDelete) {
         await HospitalTimeSV.down(time.id);
       }
-      for (const time of newTimes) {
-        await HospitalTimeSV.up({ ...time, hospitalId: hospital.id });
-      }
-      const times = (await HospitalTimeSV.hospital(hospital.id)).map(time => ({
-        dayOfWeek: time.dayOfWeek,
-        startTime: time.startTime,
-        endTime: time.endTime
-      }));
+      await HospitalTimeSV.ups(newTimes.map((i) => ({
+        hospitalId: hospital.id,
+        weekend: i.dayOfWeek,
+        timeStart: i.startTime,
+        timeEnd: i.endTime
+      })));
+      const times = await HospitalTimeSV.hospital(hospital.id)
 
       resOk(res, {
         id: hospital.id,
@@ -153,7 +167,7 @@ class AdminHospital {
         year: hospital.year,
         mapEmbedUrl: hospital.mapEmbedUrl,
         times: times
-        }
+      }
       );
     } catch (error) {
       console.log(error);
@@ -164,129 +178,208 @@ class AdminHospital {
   static async upimage(req, res, next) {
     try {
       const id = Number(req.params.id)
-      if (!id) return resOk(res, false);
+      if (!id) return resOk(res, null);
       const hospital = await HospitalSV.one(id);
       if (!hospital) return resOk(res, null);
       if (!req.customFile) return resOk(res, false);
-      hospital.thumbnail = req.customFile.fullPath;
+      hospital.thumbnail = `/${req.customFile.subPath}/${req.customFile.filename}`;
       await hospital.save();
 
+      resOk(res, hospital.thumbnail);
+    } catch (error) {
+      console.log(error);
+      return next(createError.InternalServerError());
+    }
+  }
+
+  static async getDoctorBase(req, res, next) {
+    try {
+
+      const id = Number(req.params.id)
+      if (!id) return resOk(res, null);
+      const hospital = await HospitalSV.one(id);
+      if (!hospital) return resOk(res, null);
+      const specialties = await SpecialtiesSV.all()
+      const doctorIds = (await DoctorSV.allHospital(hospital.id)).map(i => i.id)
+
       resOk(res, {
-        id: hospital.id,
-        image: hospital.thumbnail,
+        doctor: doctorIds,
+        specialties: specialties,
       });
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());
     }
   }
-
-  static async getSpecialtiesAndServices(req, res, next) {
-    try {
-      const id = Number(req.params.id)
-      if (!id) return resOk(res, false);
-      const hospital = await HospitalSV.one(id);
-      if (!hospital) return resOk(res, null);
-      const specialties = await HospitalSV.specialties(hospital.id);
-      const spcialtyRS = specialties.map(s => ({
-        id: s.id,
-        name: s.name,
-        icon: s.icon,
-        slug: s.slug,
-        title: s.title,
-        about: s.about,
-
-      }));
-      const services = await HospitalServiceSV.hospital(hospital.id);
-      const serviceRS = services.map(s => ({
-        id: s.id,
-        name: s.serviceName
-      }));
-      resOk(res, {
-        id: hospital.id,
-        name: hospital.name,
-        specialties: spcialtyRS,
-        services: serviceRS
-      });
-    } catch (error) {
-      console.log(error);
-      return next(createError.InternalServerError());
-    }
-  }
-  static async editSpecialtiesAndServices(req, res, next) {
-    try {
-      const id = Number(req.params.id)
-      if (!id) return resOk(res, false);
-      const input = req.body; 
-      // body = {
-      //   specialties: [1,4,5], // id của chuyên khoa
-      //   services: [{id: 1, name: "Xét nghiệm máu"}, {id: 2, name: "Siêu âm"}] // id <0 || id : null sẽ là thêm mới, id > 0 sẽ là cập nhật
-      // }
-      const hospital = await HospitalSV.one(id);
-      if (!hospital) return resOk(res, null);
-      // Xử lý chuyên khoa
-      // id chuyên khoa đã có trong bệnh viện
-      const oldSptIds = (await HospitalSpecialtySV.specialties(hospital.id)).map(s => s.specialtyId);
-      // lọc ra chuyên khoa mới chưa có trong bệnh viện
-
-
-      //thêm mới
-      const upSptIds = input.specialties.filter(s => !oldSptIds.includes(s));
-      for (const upSptId of upSptIds) {
-        await HospitalSpecialtySV.up({ hospitalId: hospital.id, specialtyId: upSptId });
-      }
-      //xóa
-      const dowSptIds = oldSptIds.filter(s => !input.specialties.includes(s));
-      for (const dowSptId of dowSptIds) {
-        await HospitalSpecialtySV.down(hospital.id, dowSptId);
-      }
-
-      // Xử lý dịch vụ
-      // Lấy danh sách dịch vụ hiện tại của bệnh viện
-      const oldSVIds = (await HospitalServiceSV.hospital(hospital.id)).map(s => s.id);
-
-      // thêm mới dịch vụ
-      const upSVs = input.services.filter(s => (!s.id || s.id < 0) );
-      for (const upSV of upSVs) {
-        await HospitalServiceSV.up({ hospitalId: hospital.id, serviceName: upSV.name });
-      }
-      
-      // cập nhật dịch vụ
-      const editSVs = input.services.filter(s => oldSVIds.includes(s.id) );
-      for (const editSV of editSVs) {
-        await HospitalServiceSV.edit(editSV.id, { serviceName: editSV.name });
-      }
-      // xóa dịch vụ
-      const dowSVIds = oldSVIds.filter(s => !input.services.some(i => i.id === s));
-      for (const dowSVId of dowSVIds) {
-        await HospitalServiceSV.down(dowSVId);
-      }
-      resOk(res, true);
-    } catch (error) {
-      console.log(error);
-      return next(createError.InternalServerError());
-    }
-  }
-
   static async getDoctorsNoHospital(req, res, next) {
-    try {
-      const doctors = (await DoctorSV.allNoHospital()).map(i => ({
+
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, null);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, null);
+
+
+    let { page, specialty, search } = req.query
+    page = page ? page - 1 : 0
+    const data = await DoctorSV.noHospital(page, search, hospital.id, specialty)
+    const doctors = data.data.map(i => ({
+      id: i.id,
+      slug: i.slug,
+      name: i.name,
+      code: i.code,
+      rating: i.rating,
+      email: i.user?.email ?? i.email ?? "không có thông tin",
+      img: i.img,
+      address: i.address,
+      phone: formatPhoneNumber(i.phone),
+      specialty: i.specialty?.name ?? "Không có thông tin",
+      specialtyIcon: i.specialty?.icon ?? "",
+      hospital: i.hospital?.name ?? "không có thông tin"
+    }))
+    resOk(res, {
+      doctos: doctors,
+      page: page + 1,
+      total: data.total,
+    });
+  }
+
+  static async setDoctorsToHospital(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, null);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, null);
+    const doctorIds = req.body.doctors
+    const exitDoctorIds = (await DoctorSV.allHospital(hospital.id)).map(i => i.id)
+    const upDoctors = doctorIds.filter(i => !exitDoctorIds.some(p => i == p))
+    const downDoctors = exitDoctorIds.filter(i => !doctorIds.some(p => i == p))
+    for (const doctorId of upDoctors) {
+      await DoctorSV.edit(doctorId, { hospitalId: hospital.id })
+    }
+    for (const doctorId of downDoctors) {
+      await DoctorSV.edit(doctorId, { hospitalId: null })
+    }
+    resOk(res, true);
+  }
+
+  static async getImgs(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, []);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, []);
+    const imgs = await HospitalImageSV.hospital(hospital.id)
+    resOk(res, imgs);
+  }
+
+  static async upImgs(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, []);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, []);
+    const temp = await HospitalImageSV.ups(req.customFiles.map(i => {
+      return {
+        hospitalId: hospital.id,
+        imageUrl: `/${i.subPath}/${i.filename}`
+      }
+    }))
+    const imgs = await HospitalImageSV.hospital(hospital.id)
+    resOk(res, imgs);
+  }
+  static async downImg(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, null);
+    const img = await HospitalImageSV.one(id);
+    if (!img) return resOk(res, null);
+    deleteFile(img.imageUrl)
+    await HospitalImageSV.down(id)
+    resOk(res, true);
+  }
+
+  static async initHospialSpecialtiesASevices(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, null);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, null);
+    const specialties = await SpecialtiesSV.allInPage()
+    const spcialtiesRS = specialties.data.map(i => ({
+      id: i.id,
+      name: i.name,
+      icon: i.icon,
+      title: i.title
+    }))
+
+    const service = await HospitalServiceSV.hospital(hospital.id)
+    const sptIds = (await HospitalSpecialtySV.specialties(hospital.id)).map(i => i.specialtyId)
+    let hospitalSpecialties = []
+    if (sptIds.length > 0) {
+      hospitalSpecialties = (await SpecialtiesSV.all(sptIds)).map(i => ({
         id: i.id,
-        slug: i.slug,
         name: i.name,
-        code: i.code,
-        email: i.user?.email ?? i.email ?? "không có thông tin",
-        img: i.img,
-        phone: formatPhoneNumber(i.phone),
-        specialty: i.specialty?.name ?? "Không có thông tin",
-        specialtyIcon: i.specialty?.icon ?? "",
-      }));
-      resOk(res, doctors);
+        icon: i.icon,
+        title: i.title
+      }))
+    }
+
+    resOk(res, {
+      hospitalSpecialties: hospitalSpecialties,
+      services: service,
+      specialties: spcialtiesRS,
+      page: 1,
+      total: specialties.total,
+
+    });
+  }
+
+  static async getSpecialties(req, res, next) {
+    try {
+      let { page, search } = req.query
+      page = page ? page - 1 : 0
+      const data = await SpecialtiesSV.allInPage(page, search)
+      const specialties = data.data.map(i => ({
+        id: i.id,
+        name: i.name,
+        icon: i.icon,
+        title: i.title
+      }))
+      resOk(res, {
+        specialties: specialties,
+        page: page + 1,
+        totalPages: Math.ceil(data.total / 5),
+        total: data.total,
+      });
     } catch (error) {
       console.log(error);
       return next(createError.InternalServerError());
     }
   }
+  static async saveSpecialtiesAService(req, res, next) {
+    const id = Number(req.params.id)
+    if (!id) return resOk(res, []);
+    const hospital = await HospitalSV.one(id);
+    if (!hospital) return resOk(res, []);
+
+
+    const { service, specialties } = req.body
+    const exitServiceIds = (await HospitalServiceSV.hospital(hospital.id)).map(i => i.id)
+    const newService = service.filter(i => i.id < 0)
+    const deleteService = exitServiceIds.filter(i => !service.some(s => s.id == i))
+    await HospitalServiceSV.down(deleteService)
+    await HospitalServiceSV.ups(newService.map(i => ({
+      hospitalId: hospital.id,
+      serviceName: i.serviceName
+    })))
+    const exitSptIds = (await HospitalSpecialtySV.specialties(hospital.id)).map(i => i.specialtyId)
+    const newSptIds = specialties.filter(i => !exitSptIds.some(s => s == i))
+    const deleteSptIds = exitSptIds.filter(i => !specialties.some(s => s == i))
+    await HospitalSpecialtySV.down(hospital.id, deleteSptIds)
+    await HospitalSpecialtySV.ups(newSptIds.map(i => ({
+      hospitalId: hospital.id,
+      specialtyId: i
+    })))
+
+    const SVRS = await HospitalServiceSV.hospital(hospital.id)
+    resOk(res, SVRS);
+  }
+
 
 
 }

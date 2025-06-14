@@ -8,6 +8,8 @@ const moment = require("moment");
 const UserSV = require("../services/user");
 const AccountSV = require("../services/account");
 const { hashPassword } = require("../helpers/password-crypt");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class AdminPatient {
 

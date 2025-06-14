@@ -10,6 +10,9 @@ const { sendResetPasswordEmail } = require("../helpers/mailer");
 const jwt = require('jsonwebtoken');
 const jwtConfig = require("../../config/jwt-config");
 const AdminSV = require("../services/admin");
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class Sig {
 

@@ -16,6 +16,10 @@ class HospitalTimeSV {
         return await HospitalTime.create(data)
     }
 
+    static async ups(dataArray) {
+        return await HospitalTime.bulkCreate(dataArray);
+    }
+
     static async down(id) {
         return await HospitalTime.destroy({ where: { id: id } })
     }

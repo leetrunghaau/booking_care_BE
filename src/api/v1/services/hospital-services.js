@@ -17,6 +17,9 @@ class HospitalServiceSV {
     static async up(data) {
         return await HospitalService.create(data)
     }
+    static async ups(data) {
+        return await HospitalService.bulkCreate(data)
+    }
 
     static async edit(id, data) {
         return await HospitalService.update(data, { where: { id: id } });

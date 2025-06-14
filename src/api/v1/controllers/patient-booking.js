@@ -9,6 +9,8 @@ const DoctorSV = require('../services/doctor');
 const HospitalSV = require('../services/hospital');
 const { sendAppointmentCancelToDoctor } = require('../helpers/mailer');
 const { formatPhoneNumber, formatTime } = require('../helpers/num');
+require('moment/locale/vi');
+moment.locale('vi');
 class PatientBooking {
 
     static async all(req, res, next) {

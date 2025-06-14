@@ -4,7 +4,8 @@ const moment = require('moment');
 const { formatTime } = require('../helpers/num');
 const DoctorSV = require('../services/doctor');
 const NotificationDoctorSV = require('../services/notification-doctor');
-
+require('moment/locale/vi');
+moment.locale('vi');
 class DoctorNotification {
 
     static async all(req, res, next) {

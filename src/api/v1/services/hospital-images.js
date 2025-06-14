@@ -15,7 +15,9 @@ class HospitalImageSV {
     static async up(data) {
         return await HospitalImage.create(data)
     }
-
+    static async ups(dataArray) {
+        return await HospitalImage.bulkCreate(dataArray);
+    }
     static async down(id) {
         return await HospitalImage.destroy({ where: { id: id } })
     }

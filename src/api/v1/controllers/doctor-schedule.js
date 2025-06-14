@@ -8,7 +8,8 @@ const moment = require("moment");
 const BookingSV = require("../services/Booking");
 const { generateTimeSlots } = require("../helpers/time");
 const TimeSlotSV = require("../services/time-slot");
-const { el } = require("@faker-js/faker");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class DoctorSchedule {
   static async getScheduleByDay(req, res, next) {

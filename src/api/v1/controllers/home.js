@@ -3,6 +3,9 @@ const { resOk } = require('../helpers/utils');
 const HomeSV = require('../services/home');
 const DoctorSV = require('../services/doctor');
 const SpecialtiesSV = require('../services/specialties');
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 class Home {
     static async doctors(req, res, next) {
         try {
@@ -37,7 +40,7 @@ class Home {
                     slug: i.slug,
                     name: i.name,
                     icon: i.icon,
-                   
+
                 }
             })
             resOk(res, topSpecialties);

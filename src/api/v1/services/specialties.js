@@ -10,8 +10,30 @@ class SpecialtiesSV {
         if (ids.length > 0 ) return await Specialty.findAll({ where: { id: ids } });
         return await Specialty.findAll();
     }
+    static async allInPage(page = 0, search = null) {
+        const limit = 9;
+        const offset = page * limit;
 
+        const where = {};
 
+        if (search) {
+            where.name = {
+                [Op.like]: `%${search}%`
+            };
+        }
+
+        const { count, rows } = await Specialty.findAndCountAll({
+            where,
+            limit,
+            offset,
+        });
+
+        return {
+            data: rows,
+            total: count,
+        };
+    }
+   
     static async oneBySlug(slug) {
         return await Specialty.findOne({
             where: { slug: slug }

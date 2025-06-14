@@ -17,6 +17,9 @@ class DoctorLanguageSV {
     static async up(data) {
         return await DoctorLanguage.create(data)
     }
+    static async ups(data) {
+        return await DoctorLanguage.bulkCreate(data)
+    }
     static async edit(id, data) {
         return await DoctorLanguage.update(data, {where: {id:id}})
     }

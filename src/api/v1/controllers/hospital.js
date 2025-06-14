@@ -9,11 +9,21 @@ const { formatPhoneNumber } = require('../helpers/num');
 const { getReadableTimeRanges } = require('../helpers/time');
 const SpecialtiesSV = require('../services/specialties');
 const DoctorSV = require('../services/doctor');
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 class HospitalCo {
     static async all(req, res, next) {
         try {
-            const rs = await HospitalSV.all()
-            resOk(res, rs);
+            let { page, address, search } = req.query
+            page = page ? page - 1 : 0
+            const data = await HospitalSV.allInPage(page, 9, search, address)
+
+            resOk(res, {
+                hospital: data.data,
+                page: page + 1,
+                total: data.total
+            });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());
@@ -57,15 +67,15 @@ class HospitalCo {
                 }
             })
             console.log(doctors)
-            const specialtiesIds = (await HospitalSpecialtySV.specialties(hospital.id)).map(i => i.specialtyId)            
-            const specialties =specialtiesIds.length >0 ? (await SpecialtiesSV.all(specialtiesIds)).map(i => {
+            const specialtiesIds = (await HospitalSpecialtySV.specialties(hospital.id)).map(i => i.specialtyId)
+            const specialties = specialtiesIds.length > 0 ? (await SpecialtiesSV.all(specialtiesIds)).map(i => {
                 return {
-                    id: i.id, 
+                    id: i.id,
                     name: i.name,
                     slug: i.slug,
                     icon: i.icon
                 }
-            })    :[]        
+            }) : []
             const imgs = (await HospitalImageSV.hospital(hospital.id)).map(i => i.imageUrl)
             const services = (await HospitalServiceSV.hospital(hospital.id)).map(i => i.serviceName)
             const times = (await HospitalTimeSV.hospital(hospital.id)).map(i => {
@@ -85,7 +95,7 @@ class HospitalCo {
                 times: times.length > 0 ? getReadableTimeRanges(times) : ["Không có thông tin"],
                 license: hospital.license ?? "Không có tông tin",
                 imgs: imgs,
-                years: hospital.years ? `${hospital.years} +`: "0 +",
+                years: hospital.years ? `${hospital.years} +` : "0 +",
                 mapEmbedUrl: hospital.mapEmbedUrl,
                 services: services,
                 doctors: doctors,

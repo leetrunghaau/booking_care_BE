@@ -23,6 +23,8 @@ const { generateTimeSlots } = require('../helpers/time');
 const { getActiveDays } = require('../helpers/dayly');
 const { sendAppointmentEmail, sendNewAppointmentEmailToDoctor } = require('../helpers/mailer');
 const { formatPhoneNumber, formatTime } = require('../helpers/num');
+require('moment/locale/vi');
+moment.locale('vi');
 class Booking {
     static async symptoms(req, res, next) {
         // try {

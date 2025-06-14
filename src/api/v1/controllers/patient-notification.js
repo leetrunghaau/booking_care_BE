@@ -14,6 +14,8 @@ const AccountSV = require('../services/account');
 const PrescriptionSV = require('../services/prescriptions');
 const { pickFirstValid } = require('../helpers/obj');
 const { formatTime } = require('../helpers/num');
+require('moment/locale/vi');
+moment.locale('vi');
 
 class PatientNotification {
 

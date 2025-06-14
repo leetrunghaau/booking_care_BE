@@ -1,5 +1,8 @@
 const createError = require("http-errors");
 const { resOk } = require("../helpers/utils");
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class AdminAccount {
   static async getAllAccounts(req, res, next) {

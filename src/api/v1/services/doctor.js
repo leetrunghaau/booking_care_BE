@@ -60,6 +60,92 @@ class DoctorSV {
             total: count,
         };
     }
+    static async doctorPage(page = 0, search = null, address = null, specialty = null) {
+        const limit = 9;
+        const offset = page * limit;
+
+        const where = {};
+        const whereSpecialty = {};
+        const whereAddress = {};
+
+        if (search) {
+            where.name = {
+                [Op.like]: `%${search}%`
+            };
+        }
+
+        if (address) {
+            whereAddress.address = {
+                [Op.like]: `%${address}%`
+            };
+        }
+
+        if (specialty) {
+            whereSpecialty.id = Number(specialty);
+        }
+
+        const { count, rows } = await Doctor.findAndCountAll({
+            where,
+            limit,
+            offset,
+            include: [
+                { model: Hospital , where: whereAddress},
+                { model: Specialty , where: whereSpecialty},
+                { model: User }
+            ],
+        });
+
+
+        return {
+            data: rows,
+            total: count,
+        };
+    }
+
+    static async noHospital(page = 0, search = null, hospitalId = 0, specialty = null) {
+        const limit = 6;
+        const offset = page * limit;
+
+        const where = {};
+
+        if (search) {
+            where.name = {
+                [Op.like]: `%${search}%`
+            };
+        }
+
+        where.hospitalId = {
+            [Op.or]: [
+                { [Op.is]: null },
+                hospitalId
+            ]
+          };
+
+        if (specialty) {
+            where.specialtyId = Number(specialty);
+        }
+
+        const { count, rows } = await Doctor.findAndCountAll({
+            where,
+            limit,
+            offset,
+            include: [
+                { model: Hospital },
+                { model: Specialty },
+                { model: User }
+            ],
+            // order: [['createdAt', 'DESC']] // hoặc theo cách bạn muốn
+        });
+
+        // const totalPages = Math.ceil(count / limit);
+
+        return {
+            data: rows,
+            total: count,
+        };
+    }
+
+    
 
 
     static async all2(specialtiesIds = [], address = []) {
@@ -117,6 +203,9 @@ class DoctorSV {
     }
     static async oneBySlug(slug) {
         return await Doctor.findOne({ where: { slug: slug }, include: [{ model: Hospital }, { model: Specialty }] });
+    }
+    static async oneEmail(email) {
+        return await Doctor.findOne({ where: { email: email }, include: [{ model: Hospital }, { model: Specialty }] });
     }
     static async one(id) {
         return await Doctor.findOne({ where: { id: id }, include: [{ model: Hospital }, { model: Specialty }, { model: User }] });

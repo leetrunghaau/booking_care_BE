@@ -23,6 +23,9 @@ const { generateTimeSlots, getReadableTimeRanges } = require('../helpers/time');
 const { pickFirstValid } = require('../helpers/obj');
 const HospitalTimeSV = require('../services/hospital-times');
 const { getActiveDays } = require('../helpers/dayly');
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 class DoctorSite {
     static async addresses(req, res, next) {
         try {
@@ -42,7 +45,7 @@ class DoctorSite {
     static async spesialties(req, res, next) {
         try {
             const specialties = await SpecialtiesSV.all();
-            const rs = specialties.map(({ slug, name, icon }) => ({ slug, name, icon }));
+            const rs = specialties.map(({id, slug, name, icon }) => ({ id, slug, name, icon }));
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -52,8 +55,15 @@ class DoctorSite {
 
     static async all(req, res, next) {
         try {
-            const doctors = await DoctorSV.all()
-            resOk(res, doctors);
+            let { page, address, specialty, search } = req.query
+            page = page ? page - 1 : 0
+            const data = await DoctorSV.doctorPage(page, search, address, specialty)
+
+            resOk(res, {
+                doctors: data.data,
+                page: page + 1,
+                total: data.total
+            });
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

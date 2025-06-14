@@ -18,8 +18,13 @@ const BookingPrescriptionSV = require("../services/booking-prescriptions");
 const AllergySV = require("../services/allergy");
 const { sendPrescriptionDetailEmail, sendAppointmentCancelledEmail, sendConsultationResultToPatient, sendAppointmentConfirmedToPatient } = require("../helpers/mailer");
 const mailConfig = require("../../config/mail-config");
+require('moment/locale/vi');
+moment.locale('vi');
+
+
 
 class DoctorAppointment {
+
 
   static async getAppointmentById(req, res, next) {
     try {

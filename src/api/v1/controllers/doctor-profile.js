@@ -12,6 +12,8 @@ const ScheduleSV = require("../services/schedule");
 const { formatVND, formatPhoneNumber } = require("../helpers/num");
 const { getVNGender } = require("../helpers/text");
 const { getActiveDays } = require("../helpers/dayly");
+require('moment/locale/vi');
+moment.locale('vi');
 
 class DoctorProfile {
     static async getProfile(req, res, next) {
@@ -53,8 +55,8 @@ class DoctorProfile {
 
                 experiences: experiences,
                 educations: educations,
-                analyses:analyses,
-                techniques:techniques
+                analyses: analyses,
+                techniques: techniques
 
 
             });

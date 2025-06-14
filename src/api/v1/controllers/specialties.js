@@ -8,6 +8,9 @@ const SpecialtyFaqSV = require('../services/spcialty-faq');
 const SpecialtyAdvantagesSV = require('../services/specialty-advantages');
 const DiseaseSpecialtySV = require('../services/disease-specialty');
 const DiseaseSV = require('../services/disease');
+const moment = require("moment");
+require('moment/locale/vi');
+moment.locale('vi');
 class Specialties {
     static async all(req, res, next) {
         try {
@@ -33,7 +36,7 @@ class Specialties {
             if (!specialty) return resOk(res, null)
 
             const hospitalIds = (await HospitalSpecialtySV.hospitals(specialty.id)).map(i => i.hospitalId)
-            const hospitals = hospitalIds.length >0 ? (await HospitalSV.all(hospitalIds)).map(i => {
+            const hospitals = hospitalIds.length > 0 ? (await HospitalSV.all(hospitalIds)).map(i => {
                 return {
                     id: i.id,
                     thumbnail: i.thumbnail,
@@ -67,7 +70,7 @@ class Specialties {
                 }
             })
             const diseaseIds = (await DiseaseSpecialtySV.disease(specialty.id)).slice(0, 5).map(i => i.diseaseId)
-            const disease = diseaseIds.length >0 ? await DiseaseSV.all(diseaseIds) : []
+            const disease = diseaseIds.length > 0 ? await DiseaseSV.all(diseaseIds) : []
 
             // nối kết quả
             resOk(res, {

@@ -20,6 +20,9 @@ class HospitalSpecialtySV {
     static async up(data) {
         return await HospitalSpecialty.create(data)
     }
+    static async ups(data) {
+        return await HospitalSpecialty.bulkCreate(data)
+    }
 
     static async down(hospitalId, specialtyId) {
         return await HospitalSpecialty.destroy({ where: { hospitalId: hospitalId, specialtyId: specialtyId } })

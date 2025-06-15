@@ -46,6 +46,40 @@ class BookingSV {
         });
     }
 
+    static async allDoctorInPage(id, startTime = null, endTime = null, page = 0, search = null, status = []) {
+        const limit = 5;
+        const offset = page * limit;
+
+        const where = { doctorId: id };
+        const pWhere = {};
+
+        if (startTime || endTime) {
+            if (startTime && endTime) {
+                const [from, to] = startTime <= endTime ? [startTime, endTime] : [endTime, startTime];
+                where.day = from === to ? from : { [Op.between]: [from, to] };
+            } else {
+                where.day = startTime ? { [Op.gte]: startTime } : { [Op.lte]: endTime };
+            }
+        }
+
+        if (search) pWhere.name = { [Op.like]: `%${search}%` };
+        if (status.length) where.status = { [Op.in]: status };
+
+        const result = await Booking.findAndCountAll({
+            where,
+            limit,
+            offset,
+            include: [
+                { model: Patient, where: pWhere, include: [{ model: User }] },
+                { model: Doctor, include: [{ model: User }, { model: Hospital }, { model: Specialty }] }
+            ],
+            order: [['day', 'DESC'], ['time', 'DESC']]
+        });
+
+        return { data: result.rows, total: result.count };
+    }
+
+
     static async allByPatinetADay(id, date) {
         return await Booking.findAll({
             where: {

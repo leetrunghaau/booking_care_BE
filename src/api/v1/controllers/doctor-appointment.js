@@ -76,18 +76,50 @@ class DoctorAppointment {
       return next(createError.InternalServerError());
     }
   }
-  static async byDay(req, res, next) {
+  static async getAllDoctor(req, res, next) {
     try {
-      const toDay = new Date().toISOString().split('T')[0];
       const doctor = await DoctorSV.onByUId(req.user.id);
-      if (!doctor) return resOk(res, [])
-      const rs = await BookingSV.allByDoctorADay(doctor.id, toDay);
-      resOk(res, rs);
+      if (!doctor) return resOk(res, null);
+
+      let { page = 1, search, status, currType = 'all' } = req.query;
+      
+      status = (Array.isArray(status) ? status.join(',') : status || '')
+        .split(',')
+        .map(x => x.trim())
+        .filter(Boolean);
+
+      const dateMap = {
+        thisDate: () => {
+          const d = moment().startOf('day').toISOString();
+          return [d, d];
+        },
+        thisWeek: () => [moment().startOf('week').toISOString(), moment().endOf('week').toISOString()],
+        history: () => [null, moment().subtract(1, 'day').endOf('day').toISOString()],
+        all: () => [null, null],
+      };
+
+      const [fromDate, toDate] = (dateMap[currType] || dateMap.all)();
+      const pageIndex = Number.isInteger(+page) && +page > 0 ? +page - 1 : 0;
+
+      const data = await BookingSV.allDoctorInPage(
+        doctor.id,
+        fromDate,
+        toDate,
+        pageIndex,
+        search,
+        status
+      );
+      resOk(res, {
+        appointments: data.data,
+        page: page + 1,
+        total: data.total
+      });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return next(createError.InternalServerError());
     }
   }
+
 
   static async byWeek(req, res, next) {
     try {
@@ -340,7 +372,7 @@ class DoctorAppointment {
           name: i.fileName,
           type: i.fileType,
           uri: i.fileUrl,
-          day: i.uploadedAt ?? "",
+          day: i.uploadedAt ? moment(i.uploadedAt).format("[ngày] DD, MM, YYYY"): "",
         }
       })
 

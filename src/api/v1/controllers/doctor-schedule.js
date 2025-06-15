@@ -19,7 +19,7 @@ class DoctorSchedule {
       if (!doctor) return resOk(res, []);
       const schedule = await ScheduleSV.mainDId(doctor.id)
       if (!schedule) return resOk(res, []);
-      const bookedSlot = (await BookingSV.allByDidADate(doctor.id, req.params.date)).map(i => {
+      const bookedSlot = (await BookingSV.allByDidADate(doctor.id, req.params.date)).filter(i => (i.status == "pending" || i.status == "confirmed")).map(i => {
         const [h, m] = i.time.split(':').map(Number);
         return {
           id: i.id,
@@ -37,7 +37,8 @@ class DoctorSchedule {
           end: (h * 60 + m) + (i.duration || schedule.appointmentDuration || 30),
         };
       });
-
+      const now = moment()
+      const currTime = now.format('YYYY-MM-DD') != req.params.date ? -1 : now.hour() * 60 + now.minute() - 30
       const timeSlots = generateTimeSlots(schedule).map(slot => {
         const matchedBookedSlot = bookedSlot.find(time => time.start < slot.endNum && time.end > slot.startNum);
         const matchedBusySlot = busySlots.find(time => time.start < slot.endNum && time.end > slot.startNum);

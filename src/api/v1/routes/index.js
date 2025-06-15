@@ -29,6 +29,7 @@ const doctorProfile = require('./doctor-profile')
 const adminPatient = require('./admin-patient')
 const test = require('./test')
 const chat = require('./chat/test')
+const medicineDetails = require('./medicine-details')
 
 // router.use(f);
 // Define routes
@@ -59,6 +60,7 @@ router.use(doctorHelper )
 router.use(doctorSeting )
 router.use(doctorProfile )
 router.use(adminPatient )
-router.use(chat )
+router.use(chat)
+router.use(medicineDetails)
 
 module.exports = router;

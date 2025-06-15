@@ -15,6 +15,7 @@ const PrescriptionSV = require('../services/prescriptions');
 const { pickFirstValid } = require('../helpers/obj');
 const { formatTime, calculateBMI } = require('../helpers/num');
 const { calculateAge, getVNGender } = require('../helpers/text');
+const FileStoreSV = require('../services/files-store');
 require('moment/locale/vi');
 moment.locale('vi');
 
@@ -36,6 +37,14 @@ class PatientRecord {
                     duration: i.duration ? String(i.duration) : "",
                     instructions: i.notes ?? ""
                 }));
+                const files = (await FileStoreSV.allRecord(record.id)).map(i => ({
+                    id: i.id,
+                    name: i.fileName,
+                    type: i.fileType,
+                    url: i.fileUrl,
+                    uploadedAt: i.uploadedAt ? moment(i.uploadedAt).format("[ngày] DD, MM, YYYY") : ""
+
+                }))
 
                 return {
                     id: record.id,
@@ -74,7 +83,8 @@ class PatientRecord {
                         pulse: record.pulse,
                         weight: record.weight,
                         bmi: calculateBMI(record.weight, record.height),
-                    }
+                    },
+                    files: files
                 }
             }));
             resOk(res, rs)

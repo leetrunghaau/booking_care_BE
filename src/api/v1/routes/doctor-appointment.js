@@ -22,10 +22,10 @@ router.post("/doctor-appointment/prescription/:bookingId", authorization(["docto
 router.get("/doctor-appointment/prescription-info/:bookingId", authorization(["doctor"]), DoctorAppointment.prescriptionInfo);
 router.get("/doctor-appointment/send-to-patient/prescription-info/:bookingId", authorization(["doctor"]), DoctorAppointment.sendMailToPatient);
 
-router.get("/doctor-appointments/by-day", authorization(["doctor"]), DoctorAppointment.byDay);
-router.get("/doctor-appointments/by-week", authorization(["doctor"]), DoctorAppointment.byWeek);
-router.get("/doctor-appointments/by-history", authorization(["doctor"]), DoctorAppointment.byHistory);
-router.get("/doctor-appointments/by-all", authorization(["doctor"]), DoctorAppointment.byAll);
+router.get("/doctor-appointments/", authorization(["doctor"]), DoctorAppointment.getAllDoctor);
+// router.get("/doctor-appointments/by-week", authorization(["doctor"]), DoctorAppointment.byWeek);
+// router.get("/doctor-appointments/by-history", authorization(["doctor"]), DoctorAppointment.byHistory);
+// router.get("/doctor-appointments/by-all", authorization(["doctor"]), DoctorAppointment.byAll);
 router.get("/doctor-appointment/:id/status", authorization(["doctor"]), DoctorAppointment.getStatus);
 router.post("/doctor-appointment/:id/status", authorization(["doctor"]), DoctorAppointment.updateStatus);
 router.post("/doctor-appointment/:id/update", uploadSingleFileWithSubPath("file", "/appointment"), DoctorAppointment.upfile);

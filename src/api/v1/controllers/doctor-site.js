@@ -24,6 +24,7 @@ const { pickFirstValid } = require('../helpers/obj');
 const HospitalTimeSV = require('../services/hospital-times');
 const { getActiveDays } = require('../helpers/dayly');
 const moment = require("moment");
+const TimeSlotSV = require('../services/time-slot');
 require('moment/locale/vi');
 moment.locale('vi');
 class DoctorSite {
@@ -45,7 +46,7 @@ class DoctorSite {
     static async spesialties(req, res, next) {
         try {
             const specialties = await SpecialtiesSV.all();
-            const rs = specialties.map(({id, slug, name, icon }) => ({ id, slug, name, icon }));
+            const rs = specialties.map(({ id, slug, name, icon }) => ({ id, slug, name, icon }));
             resOk(res, rs);
         } catch (error) {
             console.log(error);
@@ -494,35 +495,40 @@ class DoctorSite {
                 resOk(res, [])
                 return
             }
-            const bookings = await BookingSV.allByDidADate(doctor.id, req.params.day);
-
-            const bookedTimes = bookings.map(i => {
+            const bookedSlot = (await BookingSV.allByDidADate(doctor.id, req.params.date)).filter(i => (i.status == "pending" || i.status == "confirmed")).map(i => {
                 const [h, m] = i.time.split(':').map(Number);
-                return h * 60 + m + 1;
-            });
-
-            const timeSlots = generateTimeSlots(schedule);
-
-            const times = timeSlots.map(slot => {
-                const [hStart, mStart] = slot.start.split(':').map(Number);
-                const [hEnd, mEnd] = slot.end.split(':').map(Number);
-                const slotStart = hStart * 60 + mStart;
-                const slotEnd = hEnd * 60 + mEnd;
-
-                const isBooked = bookedTimes.some(time => {
-                    return (time >= slotStart && time <= slotEnd)
-                });
-
                 return {
-                    ...slot,
-                    available: !isBooked
+                    id: i.id,
+                    start: h * 60 + m,
+                    end: (h * 60 + m) + (i.duration || schedule.appointmentDuration || 30),
+                    patient: i.patient ? i.patient.name : null,
                 };
             });
 
+            const busySlots = (await TimeSlotSV.allByDIdAndDate(doctor.id, req.params.date)).map(i => {
+                const [h, m] = i.time.split(':').map(Number);
+                return {
+                    id: i.id,
+                    start: h * 60 + m,
+                    end: (h * 60 + m) + (i.duration || schedule.appointmentDuration || 30),
+                };
+            });
 
-            const appointmentDuration = schedule.appointmentDuration;
-            console.log("===============>", bookedTimes)
-            resOk(res, times);
+            const now = moment()
+            const currTime = now.format('YYYY-MM-DD') != req.params.date ? -1 : now.hour() * 60 + now.minute() - 30 //opset đtt lịch trước 30 phút
+            const timeSlots = generateTimeSlots(schedule).map(slot => {
+                const matchedBookedSlot = bookedSlot.find(time => time.start < slot.endNum && time.end > slot.startNum);
+                const matchedBusySlot = busySlots.find(time => time.start < slot.endNum && time.end > slot.startNum);
+                const isBooked = !!matchedBookedSlot;
+                const isBusy = !!matchedBusySlot;
+                const overTime = slot.startNum < currTime
+                return {
+                    ...slot,
+                    available: !(isBooked || isBusy || overTime)
+                };
+            })
+
+            resOk(res, timeSlots);
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError());

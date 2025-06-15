@@ -515,7 +515,7 @@ class DoctorSite {
             });
 
             const now = moment()
-            const currTime = now.format('YYYY-MM-DD') != req.params.date ? -1 : now.hour() * 60 + now.minute() - 30 //opset đtt lịch trước 30 phút
+            const currTime = now.format('YYYY-MM-DD') != req.params.date ? -1 : now.hour() * 60 + now.minute() - 30 
             const timeSlots = generateTimeSlots(schedule).map(slot => {
                 const matchedBookedSlot = bookedSlot.find(time => time.start < slot.endNum && time.end > slot.startNum);
                 const matchedBusySlot = busySlots.find(time => time.start < slot.endNum && time.end > slot.startNum);

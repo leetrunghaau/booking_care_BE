@@ -28,7 +28,7 @@ class AI {
 
                 const fullMessage =
                     "🩺 Xin chào bạn,\n" +
-                    "Hiện MedPlus chưa tìm thấy thông tin phù hợp cho câu hỏi của bạn.\n" +
+                    "Hiện tại mình chưa tìm thấy thông tin phù hợp cho câu hỏi của bạn.\n" +
                     "📍 Vui lòng thử lại với câu hỏi cụ thể hơn.\n" +
                     "☎️ Cần hỗ trợ nhanh? Gọi 0367 016 872.\n" +
                     "💙 Cảm ơn bạn đã tin tưởng MedPlus!";

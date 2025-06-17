@@ -50,7 +50,7 @@ class AI {
 
             // Step 2: Gửi tới Ollama kèm context
             const ollamaRequestBody = {
-                model: "medplus",
+                model: "medly:latest",
                 stream: true,
                 messages: [],
             };

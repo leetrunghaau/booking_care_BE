@@ -26,26 +26,22 @@ class AI {
                 res.setHeader("Cache-Control", "no-cache");
                 res.setHeader("Connection", "keep-alive");
 
-                // Phản hồi được chia nhỏ để mô phỏng AI đang gõ
-                const friendlyChunks = [
-                    "🩺 Xin chào bạn,\n",
-                    "Hiện tại MedPlus chưa tìm thấy thông tin phù hợp để hỗ trợ câu hỏi của bạn.\n\n",
-                    "📍 Bạn có thể thử lại với câu hỏi cụ thể hơn, ví dụ:\n",
-                    "– Tôi đang bị ho nhiều ngày, nên đi khám ở chuyên khoa nào?\n",
-                    "– MedPlus có bác sĩ nội tổng quát nào khám vào chiều mai không?\n\n",
-                    "☎️ Nếu cần hỗ trợ nhanh hơn, bạn hãy gọi tổng đài MedPlus qua số: 0367 016 872.\n\n",
-                    "💙 Cảm ơn bạn đã tin tưởng MedPlus, chúc bạn một ngày tốt lành!"
-                ];
+                const fullMessage =
+                    "🩺 Xin chào bạn,\n" +
+                    "Hiện MedPlus chưa tìm thấy thông tin phù hợp cho câu hỏi của bạn.\n" +
+                    "📍 Vui lòng thử lại với câu hỏi cụ thể hơn.\n" +
+                    "☎️ Cần hỗ trợ nhanh? Gọi 0367 016 872.\n" +
+                    "💙 Cảm ơn bạn đã tin tưởng MedPlus!";
 
-                // Gửi từng dòng như đang "gõ"
                 (async () => {
-                    for (const chunk of friendlyChunks) {
-                        res.write(`${chunk}`);
-                        await new Promise(resolve => setTimeout(resolve, 500)); // Delay giữa các dòng
+                    for (const char of fullMessage) {
+                        res.write(char);
+                        await new Promise(resolve => setTimeout(resolve, 30)); // Delay mỗi ký tự
                     }
                     res.end();
                 })();
                 return;
+                
             }
 
             // Step 2: Gửi tới Ollama kèm context

@@ -55,7 +55,7 @@ class AI {
                 messages: [],
             };
 
-            message = `Dưới đây là tài liệu tham khảo:\n${contextText}\n\nVui lòng trả lời thật ngắn gọn, tối đa 3 câu. Câu hỏi của tôi: ${message}`;
+            message = `Dưới đây là tài liệu tham khảo:\n${contextText}\n\nVui lòng trả lời thật ngắn gọn, tối đa 3 câu. Câu hỏi của sau: ${message}`;
 
             ollamaRequestBody.messages.push({
                 role: "user",

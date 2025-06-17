@@ -17,25 +17,45 @@ class AI {
             let contextText = "";
 
             if (ragData.found && Array.isArray(ragData.results)) {
-                // Nối các tài liệu tìm được thành 1 context
                 contextText = ragData.results.map(r => r.text).join("\n---\n");
                 console.log("📚 RAG tìm thấy context:", contextText.slice(0, 200), "...");
             } else {
-                console.log("⚠️ Không tìm thấy tài liệu từ RAG. Gửi message thuần.");
+                console.log("⛅ Không tìm thấy tài liệu từ RAG. Trả về phản hồi đơn giản.");
+
+                res.setHeader("Content-Type", "text/event-stream");
+                res.setHeader("Cache-Control", "no-cache");
+                res.setHeader("Connection", "keep-alive");
+
+                // Phản hồi được chia nhỏ để mô phỏng AI đang gõ
+                const friendlyChunks = [
+                    "🩺 Xin chào bạn,\n",
+                    "Hiện tại MedPlus chưa tìm thấy thông tin phù hợp để hỗ trợ câu hỏi của bạn.\n\n",
+                    "📍 Bạn có thể thử lại với câu hỏi cụ thể hơn, ví dụ:\n",
+                    "– Tôi đang bị ho nhiều ngày, nên đi khám ở chuyên khoa nào?\n",
+                    "– MedPlus có bác sĩ nội tổng quát nào khám vào chiều mai không?\n\n",
+                    "☎️ Nếu cần hỗ trợ nhanh hơn, bạn hãy gọi tổng đài MedPlus qua số: 0367 016 872.\n\n",
+                    "💙 Cảm ơn bạn đã tin tưởng MedPlus, chúc bạn một ngày tốt lành!"
+                ];
+
+                // Gửi từng dòng như đang "gõ"
+                (async () => {
+                    for (const chunk of friendlyChunks) {
+                        res.write(`data: ${chunk}\n\n`);
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Delay giữa các dòng
+                    }
+                    res.end();
+                })();
+                return;
             }
 
-            // Step 2: Gửi tới Ollama kèm context (nếu có)
+            // Step 2: Gửi tới Ollama kèm context
             const ollamaRequestBody = {
                 model: "medplus",
                 stream: true,
                 messages: [],
-                
             };
 
-            if (contextText) {
-                // Chèn context trực tiếp vào câu hỏi người dùng
-                message = `Dưới đây là tài liệu tham khảo:\n${contextText}\n\nVui lòng trả lời thật ngắn gọn, tối đa 3 câu. Câu hỏi của tôi:  ${message}`;
-            }
+            message = `Dưới đây là tài liệu tham khảo:\n${contextText}\n\nVui lòng trả lời thật ngắn gọn, tối đa 3 câu. Câu hỏi của tôi: ${message}`;
 
             ollamaRequestBody.messages.push({
                 role: "user",
@@ -67,7 +87,7 @@ class AI {
 
                 try {
                     const chunkOBJ = JSON.parse(chunk);
-                    res.write(chunkOBJ.message?.content || "");
+                    res.write(`data: ${chunkOBJ.message?.content || ""}\n\n`);
                 } catch (e) {
                     console.error("❌ Lỗi parse chunk:", chunk);
                 }

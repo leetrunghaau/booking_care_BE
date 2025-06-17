@@ -40,7 +40,7 @@ class AI {
                 // Gửi từng dòng như đang "gõ"
                 (async () => {
                     for (const chunk of friendlyChunks) {
-                        res.write(`data: ${chunk}\n\n`);
+                        res.write(`${chunk}`);
                         await new Promise(resolve => setTimeout(resolve, 500)); // Delay giữa các dòng
                     }
                     res.end();
@@ -87,7 +87,7 @@ class AI {
 
                 try {
                     const chunkOBJ = JSON.parse(chunk);
-                    res.write(`data: ${chunkOBJ.message?.content || ""}\n\n`);
+                    res.write(`${chunkOBJ.message?.content || ""}`);
                 } catch (e) {
                     console.error("❌ Lỗi parse chunk:", chunk);
                 }

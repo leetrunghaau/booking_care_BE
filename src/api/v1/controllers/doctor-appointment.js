@@ -784,7 +784,7 @@ class DoctorAppointment {
         duration: i.duration ?? "",
         instructions: i.notes ?? ""
       }))
-      const emailTo = patient.user.email ?? patient.email ?? null
+      const emailTo = patient.user?.email ?? patient?.email ?? null
       if (!emailTo) return resOk(res, null)
       sendPrescriptionDetailEmail(
         emailTo,
